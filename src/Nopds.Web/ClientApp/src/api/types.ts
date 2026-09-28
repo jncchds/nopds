@@ -60,6 +60,8 @@ export interface SiteConfig {
   pageSize: number
   showCovers: boolean
   languages: string[]
+  /** Single sign-on provider name when SSO is configured. */
+  sso?: string
 }
 
 export interface User {
@@ -71,6 +73,7 @@ export interface User {
   allowedLibraryIds?: number[]
   telegramUsername?: string
   kosyncConfigured: boolean
+  hasPassword: boolean
 }
 
 export interface AuthResponse { accessToken: string; expiresAt: string; user: User }
@@ -138,6 +141,7 @@ export interface AppSettings {
   preferredFormats: string[]
   conversion: { builtInFb2ToEpub: boolean; external: ExternalConverter[]; cacheSizeMb: number; timeoutSeconds: number }
   telegram: { enabled: boolean; botToken?: string; requireLinkedUser: boolean; maxItems: number }
+  sso: { requireApproval: boolean }
 }
 
 export interface AdminUser {
@@ -146,8 +150,12 @@ export interface AdminUser {
   isAdmin: boolean
   allowedLibraryIds?: number[]
   locked: boolean
+  approved: boolean
   createdAt: string
   telegramUsername?: string
+  email?: string
+  /** Provider name when the account is linked to single sign-on. */
+  sso?: string
 }
 
 export interface DirListing { path: string; parent?: string; entries: { name: string; path: string }[] }

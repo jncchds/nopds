@@ -25,9 +25,10 @@ public static class AdminEndpoints
         bool? InpxEnabled, bool? InpxSkipUnchanged, bool? InpxTestZip, bool? InpxTestFiles, bool? WatchEnabled, string? ScanCron,
         bool? DeleteLogical, bool? HashContent);
 
-    public sealed record UserInput(string? UserName, string? Password, bool? IsAdmin, int[]? AllowedLibraryIds, bool? AllLibraries, bool? Locked);
+    public sealed record UserInput(string? UserName, string? Password, bool? IsAdmin, int[]? AllowedLibraryIds, bool? AllLibraries, bool? Locked, bool? Approved);
 
-    public sealed record AdminUserDto(Guid Id, string UserName, bool IsAdmin, int[]? AllowedLibraryIds, bool Locked, DateTimeOffset CreatedAt, string? TelegramUsername);
+    /// <param name="Sso">Provider name when the account is linked to single sign-on.</param>
+    public sealed record AdminUserDto(Guid Id, string UserName, bool IsAdmin, int[]? AllowedLibraryIds, bool Locked, bool Approved, DateTimeOffset CreatedAt, string? TelegramUsername, string? Email, string? Sso);
 
     public sealed record DirEntry(string Name, string Path);
 
@@ -135,7 +136,14 @@ public static class AdminEndpoints
 
         // ---- users
         g.MapGet("/users", async (NopdsDbContext db, CancellationToken ct) =>
-            (await db.Users.AsNoTracking().OrderBy(u => u.UserName).ToListAsync(ct)).Select(ToDto));
+        {
+            var logins = await db.UserLogins.AsNoTracking().GroupBy(l => l.UserId)
+                .Select(x => new { x.Key, Name = x.Select(l => l.ProviderDisplayName ?? l.LoginProvider).First() })
+                .ToDictionaryAsync(x => x.Key, x => x.Name, ct);
+            // Pending accounts first so they are not missed.
+            return (await db.Users.AsNoTracking().OrderBy(u => u.IsApproved).ThenBy(u => u.UserName).ToListAsync(ct))
+                .Select(u => ToDto(u, logins.GetValueOrDefault(u.Id)));
+        });
 
         g.MapPost("/users", async (UserInput input, UserManager<AppUser> users) =>
         {
@@ -174,6 +182,15 @@ public static class AdminEndpoints
             if (input.IsAdmin is { } admin && !(u.Id == me.Id && !admin))
             {
                 u.IsAdmin = admin;
+            }
+
+            if (input.Approved is { } approved && u.Id != me.Id)
+            {
+                u.IsApproved = approved;
+                if (!approved)
+                {
+                    await tokens.RevokeAllAsync(u.Id, ct);
+                }
             }
 
             if (input.AllLibraries is { } all)
@@ -330,8 +347,9 @@ public static class AdminEndpoints
         l.InpxTestFiles, l.WatchEnabled, l.ScanCron, l.DeleteLogical, l.HashContent, l.LastScanStartedAt, l.LastScanFinishedAt, l.LastScanSummary,
         books, Directory.Exists(l.RootPath));
 
-    private static AdminUserDto ToDto(AppUser u) => new(
-        u.Id, u.UserName ?? "", u.IsAdmin, u.AllowedLibraryIds, u.LockoutEnd is { } e && e > DateTimeOffset.UtcNow, u.CreatedAt, u.TelegramUsername);
+    private static AdminUserDto ToDto(AppUser u, string? sso = null) => new(
+        u.Id, u.UserName ?? "", u.IsAdmin, u.AllowedLibraryIds, u.LockoutEnd is { } e && e > DateTimeOffset.UtcNow, u.IsApproved, u.CreatedAt,
+        u.TelegramUsername, u.Email, sso);
 
     private static IResult Problem(IdentityResult r) =>
         Results.ValidationProblem(r.Errors.GroupBy(e => e.Code).ToDictionary(g => g.Key, g => g.Select(e => e.Description).ToArray()));

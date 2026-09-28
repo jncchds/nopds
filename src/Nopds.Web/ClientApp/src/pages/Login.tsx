@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
-import { useLocation, useNavigate } from 'react-router'
+import { useLocation, useNavigate, useSearchParams } from 'react-router'
 import { useTranslation } from 'react-i18next'
+import { LogIn } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import { ApiError } from '../api/client'
 import { Logo } from '../components/Logo'
@@ -12,9 +13,14 @@ export default function Login() {
   const config = useConfig()
   const navigate = useNavigate()
   const location = useLocation()
+  const [params] = useSearchParams()
+  const ssoOutcome = params.get('sso')
   const [userName, setUserName] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(
+    ssoOutcome === 'pending' ? t('auth.ssoPending') : ssoOutcome === 'locked' ? t('auth.ssoLocked') : ssoOutcome === 'error' ? t('auth.ssoError') : null,
+  )
+  const from = (location.state as { from?: string } | null)?.from
   const [busy, setBusy] = useState(false)
 
   const submit = async (e: FormEvent) => {
@@ -23,10 +29,9 @@ export default function Login() {
     setError(null)
     try {
       await login(userName, password)
-      const from = (location.state as { from?: string } | null)?.from
       navigate(from && from !== '/login' ? from : '/', { replace: true })
     } catch (err) {
-      setError(err instanceof ApiError && err.status === 401 ? t('auth.invalid') : err instanceof ApiError && err.status === 423 ? t('auth.locked') : String((err as Error).message))
+      setError(err instanceof ApiError && err.status === 401 ? t('auth.invalid') : err instanceof ApiError && err.status === 423 ? t('auth.locked') : err instanceof ApiError && err.status === 403 ? t('auth.pending') : String((err as Error).message))
     } finally {
       setBusy(false)
     }
@@ -50,6 +55,19 @@ export default function Login() {
         </label>
         {error && <p className="text-sm text-red-600 dark:text-red-400" role="alert">{error}</p>}
         <button className="btn-primary w-full" disabled={busy}>{t('auth.login')}</button>
+        {config.data?.sso && (
+          <>
+            <div className="flex items-center gap-3 text-xs muted">
+              <span className="h-px flex-1 bg-line" />
+              {t('auth.or')}
+              <span className="h-px flex-1 bg-line" />
+            </div>
+            {/* Full-page navigation: the provider login cannot run inside fetch. */}
+            <a className="btn-secondary w-full" href={`/api/v1/auth/sso?returnUrl=${encodeURIComponent(from && from !== '/login' ? from : '/')}`}>
+              <LogIn className="h-4 w-4" /> {t('auth.sso', { name: config.data.sso })}
+            </a>
+          </>
+        )}
       </form>
     </div>
   )

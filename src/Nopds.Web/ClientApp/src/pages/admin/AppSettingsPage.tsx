@@ -88,6 +88,11 @@ function SettingsForm({ initial, onSaved, t }: { initial: AppSettings; onSaved: 
         <Toggle checked={s.telegram.requireLinkedUser} onChange={(v) => set('telegram', { ...s.telegram, requireLinkedUser: v })} label={t('admin.botAuth')} hint={t('admin.botAuthHint')} />
       </section>
 
+      <section className="card space-y-4 p-5">
+        <h2 className="font-semibold">{t('admin.sso')}</h2>
+        <Toggle checked={s.sso.requireApproval} onChange={(v) => set('sso', { ...s.sso, requireApproval: v })} label={t('admin.ssoRequireApproval')} hint={t('admin.ssoRequireApprovalHint')} />
+      </section>
+
       <div className="flex items-center gap-3">
         <button className="btn-primary">{t('common.save')}</button>
         {saved && <span className="text-sm text-green-700 dark:text-green-400">{t('settings.saved')}</span>}

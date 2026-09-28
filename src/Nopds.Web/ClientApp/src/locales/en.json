@@ -43,7 +43,13 @@
     "logout": "Sign out",
     "password": "Password",
     "prompt": "Sign in to your library",
-    "userName": "User name"
+    "userName": "User name",
+    "or": "or",
+    "sso": "Sign in with {{name}}",
+    "ssoPending": "Your account has been created and is waiting for an administrator to approve it.",
+    "ssoLocked": "Your account is locked.",
+    "ssoError": "Single sign-on failed. Please try again.",
+    "pending": "Your account is waiting for approval."
   },
   "theme": {
     "dark": "Dark",
@@ -148,7 +154,9 @@
     "systemLanguage": "System language",
     "telegram": "Telegram",
     "telegramHint": "Link your Telegram account to use the library bot.",
-    "telegramUser": "Telegram user name"
+    "telegramUser": "Telegram user name",
+    "setPassword": "Set password",
+    "noPasswordHint": "You sign in with single sign-on. Set a password to use HTTP Basic authentication in e-reader apps."
   },
   "admin": {
     "access": "Access",
@@ -227,7 +235,12 @@
     "users": "Users",
     "watch": "Watch for changes",
     "watchHint": "Rescan changed folders automatically (may not work on network shares).",
-    "watching": "watching"
+    "watching": "watching",
+    "pending": "pending approval",
+    "approve": "Approve",
+    "sso": "Single sign-on",
+    "ssoRequireApproval": "New single sign-on users need approval",
+    "ssoRequireApprovalHint": "Accounts created on first sign-in via the identity provider stay pending until an administrator approves them. The provider itself is configured with Nopds__Oidc__* environment variables."
   },
   "scan": {
     "archives": "Archives scanned/skipped",

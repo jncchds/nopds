@@ -43,7 +43,13 @@
     "logout": "Abmelden",
     "password": "Passwort",
     "prompt": "Melde dich bei deiner Bibliothek an",
-    "userName": "Benutzername"
+    "userName": "Benutzername",
+    "or": "oder",
+    "sso": "Mit {{name}} anmelden",
+    "ssoPending": "Dein Konto wurde angelegt und wartet auf die Freigabe durch einen Administrator.",
+    "ssoLocked": "Dein Konto ist gesperrt.",
+    "ssoError": "Single Sign-on fehlgeschlagen. Bitte erneut versuchen.",
+    "pending": "Dein Konto wartet auf Freigabe."
   },
   "theme": {
     "dark": "Dunkel",
@@ -148,7 +154,9 @@
     "systemLanguage": "Systemsprache",
     "telegram": "Telegram",
     "telegramHint": "Verknüpfe dein Telegram-Konto, um den Bibliotheks-Bot zu nutzen.",
-    "telegramUser": "Telegram-Benutzername"
+    "telegramUser": "Telegram-Benutzername",
+    "setPassword": "Passwort festlegen",
+    "noPasswordHint": "Du meldest dich per Single Sign-on an. Lege ein Passwort fest, um HTTP-Basic-Authentifizierung in E-Reader-Apps zu nutzen."
   },
   "admin": {
     "access": "Zugriff",
@@ -227,7 +235,12 @@
     "users": "Benutzer",
     "watch": "Auf Änderungen achten",
     "watchHint": "Geänderte Ordner automatisch neu scannen (funktioniert ggf. nicht auf Netzlaufwerken).",
-    "watching": "überwacht"
+    "watching": "überwacht",
+    "pending": "wartet auf Freigabe",
+    "approve": "Freigeben",
+    "sso": "Single Sign-on",
+    "ssoRequireApproval": "Neue SSO-Benutzer müssen freigegeben werden",
+    "ssoRequireApprovalHint": "Konten, die bei der ersten Anmeldung über den Identitätsanbieter angelegt werden, bleiben gesperrt, bis ein Administrator sie freigibt. Der Anbieter selbst wird über die Umgebungsvariablen Nopds__Oidc__* konfiguriert."
   },
   "scan": {
     "archives": "Archive gescannt/übersprungen",

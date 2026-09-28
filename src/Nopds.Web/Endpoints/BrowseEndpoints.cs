@@ -12,15 +12,16 @@ public static class BrowseEndpoints
 {
     public sealed record BookDetails(BookSummary Book, IReadOnlyList<string> ConvertTargets, bool OnShelf, string? KoreaderHash);
 
-    public sealed record SiteConfig(string Title, string Subtitle, string Version, AccessMode Access, bool AlphabetMenu, int SplitItems, int PageSize, bool ShowCovers, string[] Languages);
+    public sealed record SiteConfig(string Title, string Subtitle, string Version, AccessMode Access, bool AlphabetMenu, int SplitItems, int PageSize, bool ShowCovers, string[] Languages, string? Sso);
 
     public static void MapBrowseEndpoints(this IEndpointRouteBuilder api)
     {
-        api.MapGet("/config", (SettingsStore settings) =>
+        api.MapGet("/config", (SettingsStore settings, Microsoft.Extensions.Options.IOptions<NopdsOptions> options) =>
         {
             var s = settings.Current;
             var version = typeof(BrowseEndpoints).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
-            return new SiteConfig(s.Title, s.Subtitle, version, s.Access, s.AlphabetMenu, s.SplitItems, s.MaxItems, s.ShowCovers, Domain.Text.UiLanguages.Supported);
+            return new SiteConfig(s.Title, s.Subtitle, version, s.Access, s.AlphabetMenu, s.SplitItems, s.MaxItems, s.ShowCovers, Domain.Text.UiLanguages.Supported,
+                options.Value.Oidc.Enabled ? options.Value.Oidc.DisplayName : null);
         }).AllowAnonymous();
 
         var g = api.MapGroup("").RequireAuthorization(Policies.Reader);

@@ -74,7 +74,7 @@ internal sealed class BotUpdateHandler(IServiceScopeFactory scopes, SettingsStor
             return null;
         }
 
-        if (user?.LockoutEnd is { } end && end > DateTimeOffset.UtcNow)
+        if (user is not null && !user.CanSignIn(DateTimeOffset.UtcNow))
         {
             return null;
         }

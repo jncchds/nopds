@@ -44,7 +44,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//, /^\/opds/, /^\/kosync/, /^\/hubs/, /^\/health/, /^\/openapi/],
+        navigateFallbackDenylist: [/^\/api\//, /^\/signin-oidc/, /^\/opds/, /^\/kosync/, /^\/hubs/, /^\/health/, /^\/openapi/],
         runtimeCaching: [
           {
             // Covers and thumbnails: stable URLs, cache first.
@@ -81,6 +81,7 @@ export default defineConfig({
       '/opds': backend,
       '/kosync': backend,
       '/health': backend,
+      '/signin-oidc': backend,
       '/hubs': { target: backend, ws: true },
     },
   },

@@ -37,6 +37,13 @@ public sealed record AppSettings
 
     public ConversionSettings Conversion { get; init; } = new();
     public TelegramSettings Telegram { get; init; } = new();
+    public SsoSettings Sso { get; init; } = new();
+}
+
+public sealed record SsoSettings
+{
+    /// <summary>Accounts created on first single sign-on stay pending until an admin approves them.</summary>
+    public bool RequireApproval { get; init; } = true;
 }
 
 public sealed record ConversionSettings

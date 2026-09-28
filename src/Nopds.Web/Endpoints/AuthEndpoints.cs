@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Nopds.Domain.Text;
 using Nopds.Infrastructure.Data;
 using Nopds.Infrastructure.Identity;
 using Nopds.Web.Auth;
+using Nopds.Web.Infrastructure;
 
 namespace Nopds.Web.Endpoints;
 
@@ -14,18 +16,19 @@ public static class AuthEndpoints
 
     public sealed record LoginRequest(string UserName, string Password);
 
-    public sealed record UserDto(Guid Id, string UserName, bool IsAdmin, string? UiLanguage, bool HideDuplicates, int[]? AllowedLibraryIds, string? TelegramUsername, bool KosyncConfigured);
+    public sealed record UserDto(Guid Id, string UserName, bool IsAdmin, string? UiLanguage, bool HideDuplicates, int[]? AllowedLibraryIds, string? TelegramUsername, bool KosyncConfigured, bool HasPassword);
 
     public sealed record AuthResponse(string AccessToken, DateTimeOffset ExpiresAt, UserDto User);
 
     public sealed record ProfileUpdate(string? UiLanguage, bool? HideDuplicates, string? TelegramUsername);
 
-    public sealed record PasswordChange(string CurrentPassword, string NewPassword);
+    /// <summary>CurrentPassword may be empty for single sign-on accounts that have no password yet.</summary>
+    public sealed record PasswordChange(string? CurrentPassword, string NewPassword);
 
     public sealed record KosyncKey(string Password);
 
     public static UserDto ToDto(this AppUser u) =>
-        new(u.Id, u.UserName ?? "", u.IsAdmin, u.UiLanguage, u.HideDuplicates, u.AllowedLibraryIds, u.TelegramUsername, u.KosyncKeyHash is not null);
+        new(u.Id, u.UserName ?? "", u.IsAdmin, u.UiLanguage, u.HideDuplicates, u.AllowedLibraryIds, u.TelegramUsername, u.KosyncKeyHash is not null, u.PasswordHash is not null);
 
     public static void MapAuthEndpoints(this IEndpointRouteBuilder api)
     {
@@ -50,11 +53,18 @@ public static class AuthEndpoints
                 return Results.Unauthorized();
             }
 
+            if (!user.IsApproved)
+            {
+                return Results.Problem("Account is awaiting approval.", statusCode: StatusCodes.Status403Forbidden);
+            }
+
             await users.ResetAccessFailedCountAsync(user);
             var issued = await tokens.IssueAsync(user, http.Request.Headers.UserAgent, ct);
             SetRefreshCookie(http, issued);
             return Results.Ok(new AuthResponse(issued.AccessToken, issued.AccessExpires, user.ToDto()));
         });
+
+        auth.MapGet("/sso", (string? returnUrl, IOptions<NopdsOptions> options) => Sso.Challenge(returnUrl, options));
 
         auth.MapPost("/refresh", async (TokenService tokens, HttpContext http, CancellationToken ct) =>
         {
@@ -121,7 +131,9 @@ public static class AuthEndpoints
                 return Results.Unauthorized();
             }
 
-            var r = await users.ChangePasswordAsync(u, req.CurrentPassword, req.NewPassword);
+            var r = u.PasswordHash is null
+                ? await users.AddPasswordAsync(u, req.NewPassword)
+                : await users.ChangePasswordAsync(u, req.CurrentPassword ?? string.Empty, req.NewPassword);
             if (!r.Succeeded)
             {
                 return Results.ValidationProblem(r.Errors.GroupBy(e => e.Code).ToDictionary(g => g.Key, g => g.Select(e => e.Description).ToArray()));
@@ -151,7 +163,7 @@ public static class AuthEndpoints
         });
     }
 
-    private static void SetRefreshCookie(HttpContext http, IssuedTokens t) =>
+    internal static void SetRefreshCookie(HttpContext http, IssuedTokens t) =>
         http.Response.Cookies.Append(RefreshCookie, t.RefreshToken, new CookieOptions
         {
             HttpOnly = true,

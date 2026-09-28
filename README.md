@@ -43,6 +43,7 @@ Built with **ASP.NET Core (.NET 10)**, **PostgreSQL** and a **React + TypeScript
 **Security**
 - JWT access tokens (short-lived, in memory) plus rotating refresh tokens in an httpOnly cookie, with reuse detection
 - ASP.NET Identity password hashing, lockout, rate-limited login
+- Optional **single sign-on** with Authentik (or any OpenID Connect provider): accounts are created on first sign-in and, by default, wait for admin approval
 
 ## Quick start (Docker)
 
@@ -85,14 +86,32 @@ Host settings come from `appsettings.json` or environment variables (`__` separa
 | `Nopds__DataDir`                | `data`                    | Signing keys, data-protection keys, logs          |
 | `Nopds__CacheDir`               | `data/cache`              | Covers, thumbnails, converted books               |
 | `Nopds__AdminUser` / `Nopds__AdminPassword` | `admin` / –   | First admin, created only when no users exist     |
+| `Nopds__AdminForce`             | `false`                   | Recovery: on every start, create `AdminUser` if missing, reset its password to `AdminPassword`, restore admin rights, approve and unlock it |
 | `Nopds__AutoMigrate`            | `true`                    | Apply database migrations on start                |
 | `Nopds__Jwt__Key`               | generated                 | HMAC key (≥ 32 bytes); generated into `DataDir` when empty |
 | `Nopds__Jwt__AccessTokenMinutes`| `15`                      | Access token lifetime                              |
 | `Nopds__Jwt__RefreshTokenDays`  | `30`                      | Refresh token lifetime                             |
+| `Nopds__Oidc__Authority`        | –                         | OpenID Connect issuer URL; single sign-on is off when empty |
+| `Nopds__Oidc__ClientId` / `Nopds__Oidc__ClientSecret` | –   | OAuth2 client credentials                          |
+| `Nopds__Oidc__DisplayName`      | `Authentik`               | Provider name on the login button                  |
+| `Nopds__Oidc__Scopes__0…`       | `openid profile email`    | Requested scopes                                   |
 
-Everything else (site title, public/private access, page sizes, duplicate handling, covers, converters, Telegram bot) is edited at runtime in **Administration → Settings**. Library options (extensions, ZIP code page, INPX, schedule, watching, soft delete, hashing) are per library.
+Everything else (site title, public/private access, page sizes, duplicate handling, covers, converters, Telegram bot, SSO approval) is edited at runtime in **Administration → Settings**. Library options (extensions, ZIP code page, INPX, schedule, watching, soft delete, hashing) are per library.
 
 Behind a reverse proxy, forward `X-Forwarded-Proto` and `X-Forwarded-Host` so OPDS links use the public address.
+
+### Single sign-on with Authentik
+
+1. In Authentik, create an **OAuth2/OpenID Provider** (confidential client, scopes `openid`, `profile`, `email`) with the redirect URI `https://<your-nopds-host>/signin-oidc`, and an **Application** using it (slug e.g. `nopds`).
+2. Configure NOPDS:
+   ```yaml
+   Nopds__Oidc__Authority: "https://auth.example.com/application/o/nopds/"
+   Nopds__Oidc__ClientId: "<client id>"
+   Nopds__Oidc__ClientSecret: "<client secret>"
+   ```
+3. The login page gets a **Sign in with Authentik** button. The first sign-in creates a local account (named after `preferred_username`; a number is appended if a local user already has that name — existing accounts are never taken over). By default the account waits until an admin approves it in **Administration → Users**, where admins also grant or revoke admin rights; turn this off in **Administration → Settings → Single sign-on**.
+
+NOPDS must be served over HTTPS for the sign-in round trip (the OIDC correlation cookies are `Secure`). E-readers cannot use SSO: SSO users open their personal feed link from **Settings**, or set a local password there for HTTP Basic auth.
 
 ## Development
 

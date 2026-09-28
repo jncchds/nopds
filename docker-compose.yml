@@ -16,6 +16,12 @@ services:
       ConnectionStrings__Nopds: "Host=postgres;Database=nopds;Username=nopds;Password=${POSTGRES_PASSWORD:-nopds}"
       Nopds__AdminUser: "${NOPDS_ADMIN_USER:-admin}"
       Nopds__AdminPassword: "${NOPDS_ADMIN_PASSWORD:-changeme}"
+      # Recovery: reset the admin's password and restore its admin rights on start.
+      # Nopds__AdminForce: "true"
+      # Optional single sign-on (Authentik): see README → Single sign-on.
+      # Nopds__Oidc__Authority: "https://auth.example.com/application/o/nopds/"
+      # Nopds__Oidc__ClientId: ""
+      # Nopds__Oidc__ClientSecret: ""
     ports:
       - "8080:8080"
     volumes:

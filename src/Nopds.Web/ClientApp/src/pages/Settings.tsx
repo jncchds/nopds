@@ -82,7 +82,8 @@ export default function Settings() {
       return
     }
     try {
-      await api('/me/password', { method: 'POST', json: { currentPassword: f.get('currentPassword'), newPassword: f.get('newPassword') } })
+      await api('/me/password', { method: 'POST', json: { currentPassword: f.get('currentPassword') ?? undefined, newPassword: f.get('newPassword') } })
+      if (!user.hasPassword) setUser({ ...user, hasPassword: true })
       setMsg({ password: t('settings.passwordChanged') })
       e.currentTarget.reset()
     } catch (err) {
@@ -157,13 +158,13 @@ export default function Settings() {
         {msg.telegram && <p className="mt-2 text-xs muted">{msg.telegram}</p>}
       </Section>
 
-      <Section title={t('settings.password')}>
+      <Section title={t('settings.password')} description={user.hasPassword ? undefined : t('settings.noPasswordHint')}>
         <form onSubmit={changePassword} className="grid gap-3 sm:grid-cols-3">
-          <input name="currentPassword" type="password" className="input" placeholder={t('settings.currentPassword')} autoComplete="current-password" required />
+          {user.hasPassword && <input name="currentPassword" type="password" className="input" placeholder={t('settings.currentPassword')} autoComplete="current-password" required />}
           <input name="newPassword" type="password" className="input" placeholder={t('settings.newPassword')} autoComplete="new-password" minLength={6} required />
           <input name="confirm" type="password" className="input" placeholder={t('settings.confirmPassword')} autoComplete="new-password" required />
           <div className="flex items-center gap-3 sm:col-span-3">
-            <button className="btn-primary">{t('settings.changePassword')}</button>
+            <button className="btn-primary">{user.hasPassword ? t('settings.changePassword') : t('settings.setPassword')}</button>
             {msg.password && <span className="text-sm muted">{msg.password}</span>}
           </div>
         </form>

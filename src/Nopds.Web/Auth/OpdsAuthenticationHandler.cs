@@ -104,7 +104,7 @@ public sealed class OpdsAuthenticationHandler(
         return Task.CompletedTask;
     }
 
-    private static bool IsLocked(AppUser user) => user.LockoutEnd is { } end && end > DateTimeOffset.UtcNow;
+    private static bool IsLocked(AppUser user) => !user.CanSignIn(DateTimeOffset.UtcNow);
 
     private AuthenticateResult Success(AppUser user)
     {

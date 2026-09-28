@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Lock, Pencil, Plus, Trash2, Unlock } from 'lucide-react'
+import { Check, Lock, Pencil, Plus, Trash2, Unlock } from 'lucide-react'
 import { api, ApiError } from '../../api/client'
 import type { AdminUser, LibraryDto } from '../../api/types'
 import { useAuth } from '../../auth/AuthContext'
@@ -16,6 +16,7 @@ export default function Users() {
   const [editing, setEditing] = useState<AdminUser | 'new' | null>(null)
   const invalidate = () => qc.invalidateQueries({ queryKey: ['admin', 'users'] })
   const lock = useMutation({ mutationFn: (u: AdminUser) => api(`/admin/users/${u.id}`, { method: 'PUT', json: { locked: !u.locked } }), onSuccess: invalidate })
+  const approve = useMutation({ mutationFn: (id: string) => api(`/admin/users/${id}`, { method: 'PUT', json: { approved: true } }), onSuccess: invalidate })
   const remove = useMutation({ mutationFn: (id: string) => api(`/admin/users/${id}`, { method: 'DELETE' }), onSuccess: invalidate })
 
   if (users.isLoading) return <Loading />
@@ -32,13 +33,19 @@ export default function Users() {
               <div className="font-medium">
                 {u.userName}
                 {u.isAdmin && <span className="ml-2 rounded bg-accent-faint px-1.5 py-0.5 text-xs text-accent">{t('admin.admin')}</span>}
+                {!u.approved && <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-900 dark:bg-amber-900/50 dark:text-amber-200">{t('admin.pending')}</span>}
                 {u.locked && <span className="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-800 dark:bg-red-900/50 dark:text-red-200">{t('admin.locked')}</span>}
               </div>
               <div className="text-xs muted">
                 {formatDate(u.createdAt, i18n.language)} · {u.allowedLibraryIds ? t('admin.someLibraries', { count: u.allowedLibraryIds.length }) : t('admin.allLibraries')}
+                {u.sso && ` · ${u.sso}`}
+                {u.email && ` · ${u.email}`}
                 {u.telegramUsername && ` · @${u.telegramUsername}`}
               </div>
             </div>
+            {!u.approved && (
+              <button className="btn-primary" onClick={() => approve.mutate(u.id)}><Check className="h-4 w-4" /> {t('admin.approve')}</button>
+            )}
             <button className="btn-ghost px-2" onClick={() => setEditing(u)} aria-label={t('common.edit')}><Pencil className="h-4 w-4" /></button>
             {u.id !== me?.id && (
               <>

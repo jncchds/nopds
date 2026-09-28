@@ -6,6 +6,9 @@ public class AppUser : IdentityUser<Guid>
 {
     public bool IsAdmin { get; set; }
 
+    /// <summary>False for accounts created by single sign-on that still await admin approval.</summary>
+    public bool IsApproved { get; set; } = true;
+
     /// <summary>Secret used in OPDS URLs (/opds/t/{token}/...) for readers without auth support.</summary>
     public string FeedToken { get; set; } = NewToken();
 
@@ -24,6 +27,9 @@ public class AppUser : IdentityUser<Guid>
     public string? KosyncKeyHash { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+    /// <summary>Approved and not locked by an admin.</summary>
+    public bool CanSignIn(DateTimeOffset now) => IsApproved && !(LockoutEnd is { } end && end > now);
 
     public static string NewToken() =>
         Convert.ToHexStringLower(System.Security.Cryptography.RandomNumberGenerator.GetBytes(20));

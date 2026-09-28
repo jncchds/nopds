@@ -66,6 +66,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddScoped<CurrentUser>();
 builder.Services.AddSingleton<SigningKeyProvider>();
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<SsoAccounts>();
 builder.Services.AddScoped<ScopeFactory>();
 builder.Services.AddScoped<BookFiles>();
 builder.Services.AddScoped<Covers>();
@@ -86,7 +87,8 @@ builder.Services.ConfigureHttpJsonOptions(o =>
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer()
-    .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, OpdsAuthenticationHandler>(OpdsAuthenticationHandler.SchemeName, null);
+    .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, OpdsAuthenticationHandler>(OpdsAuthenticationHandler.SchemeName, null)
+    .AddNopdsSso(nopds.Oidc);
 builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
     .Configure<SigningKeyProvider>((o, keys) =>
     {
@@ -144,7 +146,7 @@ var app = builder.Build();
 await using (var scope = app.Services.CreateAsyncScope())
 {
     await scope.ServiceProvider.GetRequiredService<DatabaseInitializer>()
-        .InitializeAsync(nopds.AutoMigrate, nopds.AdminUser, nopds.AdminPassword);
+        .InitializeAsync(nopds.AutoMigrate, nopds.AdminUser, nopds.AdminPassword, nopds.AdminForce);
 }
 
 app.UseForwardedHeaders();

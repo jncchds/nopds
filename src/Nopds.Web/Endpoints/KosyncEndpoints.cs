@@ -109,7 +109,7 @@ public static class KosyncEndpoints
 
         var normalized = name.ToUpperInvariant();
         var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.NormalizedUserName == normalized, ct);
-        if (user?.KosyncKeyHash is null || (user.LockoutEnd is { } end && end > DateTimeOffset.UtcNow))
+        if (user?.KosyncKeyHash is null || !user.CanSignIn(DateTimeOffset.UtcNow))
         {
             return null;
         }

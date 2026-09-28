@@ -65,7 +65,7 @@ public sealed class TokenService(NopdsDbContext db, SigningKeyProvider key, IOpt
         }
 
         var user = await db.Users.FirstOrDefaultAsync(u => u.Id == stored.UserId, ct);
-        if (user is null || (user.LockoutEnd is { } end && end > now))
+        if (user is null || !user.CanSignIn(now))
         {
             return null;
         }

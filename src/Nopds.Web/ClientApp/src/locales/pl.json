@@ -45,7 +45,13 @@
     "logout": "Wyloguj",
     "password": "Hasło",
     "prompt": "Zaloguj się do swojej biblioteki",
-    "userName": "Nazwa użytkownika"
+    "userName": "Nazwa użytkownika",
+    "or": "lub",
+    "sso": "Zaloguj przez {{name}}",
+    "ssoPending": "Konto zostało utworzone i czeka na zatwierdzenie przez administratora.",
+    "ssoLocked": "Twoje konto jest zablokowane.",
+    "ssoError": "Logowanie jednokrotne nie powiodło się. Spróbuj ponownie.",
+    "pending": "Twoje konto czeka na zatwierdzenie."
   },
   "theme": {
     "dark": "Ciemny",
@@ -152,7 +158,9 @@
     "systemLanguage": "Język systemu",
     "telegram": "Telegram",
     "telegramHint": "Powiąż konto Telegram, aby korzystać z bota biblioteki.",
-    "telegramUser": "Nazwa użytkownika Telegram"
+    "telegramUser": "Nazwa użytkownika Telegram",
+    "setPassword": "Ustaw hasło",
+    "noPasswordHint": "Logujesz się przez SSO. Ustaw hasło, aby używać uwierzytelniania HTTP Basic w czytnikach."
   },
   "admin": {
     "access": "Dostęp",
@@ -233,7 +241,12 @@
     "users": "Użytkownicy",
     "watch": "Obserwuj zmiany",
     "watchHint": "Automatycznie skanuj zmienione foldery (może nie działać w udziałach sieciowych).",
-    "watching": "obserwowana"
+    "watching": "obserwowana",
+    "pending": "czeka na zatwierdzenie",
+    "approve": "Zatwierdź",
+    "sso": "Logowanie jednokrotne (SSO)",
+    "ssoRequireApproval": "Nowi użytkownicy SSO wymagają zatwierdzenia",
+    "ssoRequireApprovalHint": "Konta utworzone przy pierwszym logowaniu przez dostawcę tożsamości czekają na zatwierdzenie przez administratora. Samego dostawcę konfiguruje się zmiennymi środowiskowymi Nopds__Oidc__*."
   },
   "scan": {
     "archives": "Archiwa skanowane/pominięte",
