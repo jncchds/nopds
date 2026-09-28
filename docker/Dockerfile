@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---- SPA build ----
-FROM node:22-alpine AS spa
+FROM --platform=$BUILDPLATFORM node:22-alpine AS spa
 WORKDIR /spa
 COPY src/Nopds.Web/ClientApp/package.json src/Nopds.Web/ClientApp/package-lock.json ./
 RUN npm ci
@@ -9,9 +9,11 @@ COPY src/Nopds.Web/ClientApp/ ./
 RUN npm run build && test -f /wwwroot/index.html
 
 # ---- .NET build ----
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+# Runs natively on the build host and cross-targets the image architecture (no emulation).
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+ARG TARGETARCH
 WORKDIR /src
-COPY Directory.Build.props Directory.Packages.props Nopds.sln ./
+COPY VERSION Directory.Build.props Directory.Packages.props Nopds.sln ./
 COPY src/Nopds.Domain/Nopds.Domain.csproj src/Nopds.Domain/
 COPY src/Nopds.Infrastructure/Nopds.Infrastructure.csproj src/Nopds.Infrastructure/
 COPY src/Nopds.Formats/Nopds.Formats.csproj src/Nopds.Formats/
@@ -20,10 +22,10 @@ COPY src/Nopds.Conversion/Nopds.Conversion.csproj src/Nopds.Conversion/
 COPY src/Nopds.Opds/Nopds.Opds.csproj src/Nopds.Opds/
 COPY src/Nopds.Telegram/Nopds.Telegram.csproj src/Nopds.Telegram/
 COPY src/Nopds.Web/Nopds.Web.csproj src/Nopds.Web/
-RUN dotnet restore src/Nopds.Web/Nopds.Web.csproj
+RUN dotnet restore src/Nopds.Web/Nopds.Web.csproj -a $TARGETARCH
 COPY src/ src/
 COPY --from=spa /wwwroot/ src/Nopds.Web/wwwroot/
-RUN dotnet publish src/Nopds.Web/Nopds.Web.csproj -c Release -o /app -p:SkipSpaBuild=true --no-restore
+RUN dotnet publish src/Nopds.Web/Nopds.Web.csproj -c Release -a $TARGETARCH --self-contained false -o /app -p:SkipSpaBuild=true --no-restore
 
 # ---- runtime ----
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime

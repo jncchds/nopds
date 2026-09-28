@@ -1,0 +1,94 @@
+name: Docker image
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+env:
+  IMAGE: jncchds/nopds
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.x"
+
+      # Integration tests start PostgreSQL through Testcontainers on the runner's Docker.
+      - name: Run tests
+        run: dotnet test tests/Nopds.Tests/Nopds.Tests.csproj --configuration Release
+
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read app version
+        id: version
+        run: echo "value=$(tr -d '[:space:]' < VERSION)" >> "$GITHUB_OUTPUT"
+
+      # Only the runtime stage runs emulated; the SPA and .NET stages cross-build natively.
+      - uses: docker/setup-qemu-action@v3
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ steps.version.outputs.value }}
+            type=sha,prefix=sha-,format=short
+          labels: |
+            org.opencontainers.image.version=${{ steps.version.outputs.value }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Docker Hub renders the README out of repo context: point relative links at GitHub
+      # and put a link to the source repository on top.
+      - name: Prepare Docker Hub description
+        if: github.ref == 'refs/heads/main'
+        env:
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        run: |
+          {
+            echo "> Source code, issues and docs: [${{ github.repository }}]($REPO_URL)"
+            echo
+            sed -E \
+              -e "s#(!\[[^]]*\])\((\./)?([^):#][^):]*)\)#\1(https://raw.githubusercontent.com/${{ github.repository }}/main/\3)#g" \
+              -e "s#(^|[^!])(\[[^]]*\])\((\./)?([^):#][^):]*)\)#\1\2($REPO_URL/blob/main/\4)#g" \
+              README.md
+          } > dockerhub-readme.md
+
+      - name: Update Docker Hub description
+        if: github.ref == 'refs/heads/main'
+        uses: peter-evans/dockerhub-description@v5
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ env.IMAGE }}
+          short-description: "Self-hosted e-book library server with OPDS, web reader and Telegram bot (.NET)"
+          readme-filepath: dockerhub-readme.md

@@ -8,7 +8,8 @@
     <Product>.NET OPDS by CHDS</Product>
     <Company>CHDS</Company>
     <Copyright>Copyright © CHDS</Copyright>
-    <Version>0.1.0</Version>
+    <!-- VERSION at the repo root is the single source of truth (also used to tag Docker images). -->
+    <Version>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)VERSION').Trim())</Version>
     <InvariantGlobalization>false</InvariantGlobalization>
   </PropertyGroup>
 </Project>
