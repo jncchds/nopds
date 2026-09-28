@@ -169,7 +169,7 @@ public static class AtomWriter
 
     private static string Date(DateTimeOffset d) => d.UtcDateTime.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture);
 
-    public static byte[] OpenSearch(string title, string description, string templateUrl, string lang)
+    public static byte[] OpenSearch(string title, string description, string templateUrl, string lang, string type = OpdsTypes.Acquisition)
     {
         using var ms = new MemoryStream();
         using (var w = XmlWriter.Create(ms, new XmlWriterSettings { Encoding = new UTF8Encoding(false) }))
@@ -182,7 +182,7 @@ public static class AtomWriter
             w.WriteElementString("OutputEncoding", OsNs, "UTF-8");
             w.WriteElementString("Language", OsNs, lang);
             w.WriteStartElement("Url", OsNs);
-            w.WriteAttributeString("type", OpdsTypes.Acquisition);
+            w.WriteAttributeString("type", type);
             w.WriteAttributeString("template", templateUrl);
             w.WriteEndElement();
             w.WriteEndElement();

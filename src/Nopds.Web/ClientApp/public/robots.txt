@@ -1,0 +1,3 @@
+# .NET OPDS is a private library: keep it out of search engines.
+User-agent: *
+Disallow: /

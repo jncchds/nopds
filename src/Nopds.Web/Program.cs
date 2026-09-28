@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Nopds.Conversion;
@@ -130,6 +131,9 @@ builder.Services.Configure<ForwardedHeadersOptions>(o =>
 });
 
 builder.Services.AddResponseCompression(o => o.EnableForHttps = true);
+builder.Services.AddDataProtection()
+    .SetApplicationName("nopds")
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(nopds.DataDir, "keys")));
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks().AddNpgSql(connectionString, name: "database");
 
@@ -157,6 +161,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapHealthChecks("/health");
+
+// Lets browsers add the library as a search engine (search opens the SPA search page).
+app.MapGet("/opensearch.xml", (HttpContext http, SettingsStore settings) =>
+{
+    var origin = $"{http.Request.Scheme}://{http.Request.Host}{http.Request.PathBase}";
+    var xml = Nopds.Opds.AtomWriter.OpenSearch(settings.Current.Title, settings.Current.Subtitle, origin + "/search?q={searchTerms}", "en", "text/html");
+    return Results.Bytes(xml, "application/opensearchdescription+xml");
+}).AllowAnonymous();
 
 var api = app.MapGroup("/api/v1");
 api.MapAuthEndpoints();
