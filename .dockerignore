@@ -1,0 +1,13 @@
+**/bin
+**/obj
+**/node_modules
+**/dist
+**/dev-dist
+src/Nopds.Web/wwwroot
+sopds
+data
+books
+.git
+.claude
+*.md
+!README.md

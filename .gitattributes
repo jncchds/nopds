@@ -1,0 +1,9 @@
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
+*.webp binary
+*.zip binary
+*.epub binary
+*.mobi binary
+*.fb2 binary

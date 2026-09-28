@@ -1,0 +1,43 @@
+# .NET OPDS by CHDS — production-style stack.
+#   1. Adjust the library volume(s) below.
+#   2. docker compose up -d --build
+#   3. Open http://localhost:8080 and sign in with NOPDS_ADMIN_USER / NOPDS_ADMIN_PASSWORD.
+services:
+  nopds:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: nopds:latest
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__Nopds: "Host=postgres;Database=nopds;Username=nopds;Password=${POSTGRES_PASSWORD:-nopds}"
+      Nopds__AdminUser: "${NOPDS_ADMIN_USER:-admin}"
+      Nopds__AdminPassword: "${NOPDS_ADMIN_PASSWORD:-changeme}"
+    ports:
+      - "8080:8080"
+    volumes:
+      - nopds-data:/data
+      # Mount each library read-only; register it in Admin → Libraries using the container path.
+      - ./books:/books:ro
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nopds
+      POSTGRES_USER: nopds
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-nopds}"
+    volumes:
+      - nopds-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nopds -d nopds"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  nopds-data:
+  nopds-db:

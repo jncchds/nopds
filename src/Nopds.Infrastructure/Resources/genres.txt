@@ -1,0 +1,254 @@
+# FB2 genre catalog, derived from SimpleOPDS fixtures/genre.json (GPLv3).
+# Section lines:  @key|en|uk|pl|de
+# Genre lines:    code|section|en|uk|pl|de
+@business|Business|Ділова література|Biznes|Wirtschaft
+@detective|Detectives & Thrillers|Детективи та трилери|Kryminał i thriller|Krimis & Thriller
+@nonfiction|Non-fiction|Документальна література|Literatura faktu|Sachbuch
+@home|Home & Family|Дім і сім'я|Dom i rodzina|Haus & Familie
+@drama|Drama|Драматургія|Dramat|Drama
+@art|Art & Design|Мистецтво, мистецтвознавство, дизайн|Sztuka i design|Kunst & Design
+@computers|Computers & Internet|Комп'ютери та інтернет|Komputery i internet|Computer & Internet
+@children|Children's literature|Дитяча література|Literatura dziecięca|Kinderbuch
+@romance|Romance|Любовні романи|Romans|Liebesromane
+@science|Science & Education|Наука, освіта|Nauka i edukacja|Wissenschaft & Bildung
+@poetry|Poetry|Поезія|Poezja|Lyrik
+@adventure|Adventure|Пригоди|Przygoda|Abenteuer
+@prose|Prose|Проза|Proza|Belletristik
+@other|Other|Інше|Inne|Sonstiges
+@religion|Religion & Esoterics|Релігія, духовність, езотерика|Religia i ezoteryka|Religion & Esoterik
+@reference|Reference|Довідкова література|Literatura podręczna|Nachschlagewerke
+@antique|Ancient literature|Стародавня література|Literatura dawna|Alte Literatur
+@technics|Technology|Техніка|Technika|Technik
+@textbooks|Textbooks|Підручники та посібники|Podręczniki|Lehrbücher
+@sf|Science Fiction & Fantasy|Фантастика|Fantastyka|Science-Fiction & Fantasy
+@folklore|Folklore|Фольклор|Folklor|Folklore
+@humor|Humor|Гумор|Humor|Humor
+@unknown|Unknown genre|Невідомий жанр|Nieznany gatunek|Unbekanntes Genre
+economics_ref|business|Business literature|Ділова література|Literatura biznesowa|Wirtschaftsliteratur
+popular_business|business|Career, HR|Кар'єра, кадри|Kariera, kadry|Karriere, Personal
+org_behavior|business|Marketing, PR|Маркетинг, PR|Marketing, PR|Marketing, PR
+banking|business|Finance|Фінанси|Finanse|Finanzen
+economics|business|Economics|Економіка|Ekonomia|Wirtschaft
+det_action|detective|Action|Бойовик|Sensacja|Action
+detective|detective|Detective|Детективи|Kryminał|Krimi
+det_irony|detective|Ironic detective|Іронічний детектив|Kryminał ironiczny|Humorvoller Krimi
+det_history|detective|Historical detective|Історичний детектив|Kryminał historyczny|Historischer Krimi
+det_classic|detective|Classic detective|Класичний детектив|Kryminał klasyczny|Klassischer Krimi
+det_crime|detective|Crime|Кримінальний детектив|Kryminał|Kriminalroman
+det_hard|detective|Hardboiled|Крутий детектив|Czarny kryminał|Hardboiled
+det_political|detective|Political detective|Політичний детектив|Kryminał polityczny|Politkrimi
+det_police|detective|Police procedural|Поліцейський детектив|Kryminał policyjny|Polizeikrimi
+det_maniac|detective|Serial killers|Про маніяків|O seryjnych mordercach|Serienmörder
+det_su|detective|Soviet detective|Радянський детектив|Kryminał radziecki|Sowjetischer Krimi
+thriller|detective|Thriller|Трилер|Thriller|Thriller
+det_espionage|detective|Espionage|Шпигунський детектив|Szpiegowski|Spionage
+nonf_biography|nonfiction|Biographies & Memoirs|Біографії та мемуари|Biografie i wspomnienia|Biografien & Memoiren
+nonf_military|nonfiction|Military documentary|Військова документалістика|Literatura wojskowa|Militärsachbuch
+military_special|nonfiction|Military science|Військова справа|Wojskowość|Militärwesen
+travel_notes|nonfiction|Travel writing|Географія, подорожні нотатки|Podróże|Reiseberichte
+nonfiction|nonfiction|Non-fiction|Документальна література|Literatura faktu|Sachbuch
+nonf_publicism|nonfiction|Essays & Journalism|Публіцистика|Publicystyka|Publizistik
+auto_regulations|home|Cars & Traffic rules|Автомобілі та ПДР|Samochody i przepisy|Autos & Verkehrsregeln
+home_sport|home|Sports & Martial arts|Бойові мистецтва, спорт|Sport i sztuki walki|Sport & Kampfkunst
+home_pets|home|Pets|Домашні тварини|Zwierzęta domowe|Haustiere
+home|home|Housekeeping|Домоводство|Prowadzenie domu|Haushalt
+home_health|home|Health|Здоров'я|Zdrowie|Gesundheit
+home_collecting|home|Collecting|Колекціонування|Kolekcjonerstwo|Sammeln
+home_cooking|home|Cooking|Кулінарія|Kulinaria|Kochen
+sci_pedagogy|home|Parenting & Pedagogy|Педагогіка, виховання дітей|Pedagogika i wychowanie|Pädagogik & Erziehung
+home_entertain|home|Entertainment|Розваги|Rozrywka|Unterhaltung
+home_garden|home|Gardening|Сад і город|Ogród|Garten
+home_diy|home|DIY|Зроби сам|Zrób to sam|Heimwerken
+family|home|Family relationships|Сімейні стосунки|Relacje rodzinne|Familienbeziehungen
+home_sex|home|Relationships & Sex|Сімейні стосунки, секс|Związki i seks|Beziehungen & Sexualität
+home_crafts|home|Hobbies & Crafts|Хобі та ремесла|Hobby i rękodzieło|Hobby & Handwerk
+drama_antique|drama|Ancient drama|Антична драма|Dramat antyczny|Antikes Drama
+drama|drama|Drama|Драма|Dramat|Drama
+dramaturgy|drama|Dramaturgy|Драматургія|Dramaturgia|Dramatik
+comedy|drama|Comedy|Комедія|Komedia|Komödie
+vaudeville|drama|Mystery play, Vaudeville|Містерія, буфонада, водевіль|Misterium, wodewil|Mysterienspiel, Varieté
+screenplays|drama|Screenplays|Сценарій|Scenariusze|Drehbücher
+tragedy|drama|Tragedy|Трагедія|Tragedia|Tragödie
+painting|art|Painting & Albums|Живопис, альбоми, каталоги|Malarstwo i albumy|Malerei & Bildbände
+design|art|Art & Design|Мистецтво і дизайн|Sztuka i design|Kunst & Design
+art_criticism|art|Art history|Мистецтвознавство|Historia sztuki|Kunstwissenschaft
+cine|art|Cinema|Кіно|Kino|Film
+nonf_criticism|art|Criticism|Критика|Krytyka|Kritik
+sci_culture|art|Cultural studies|Культурологія|Kulturoznawstwo|Kulturwissenschaft
+art_world_culture|art|World art culture|Світова художня культура|Kultura światowa|Weltkunst
+music|art|Music|Музика|Muzyka|Musik
+notes|art|Sheet music|Партитури|Nuty|Noten
+architecture_book|art|Sculpture & Architecture|Скульптура та архітектура|Rzeźba i architektura|Skulptur & Architektur
+theatre|art|Theatre|Театр|Teatr|Theater
+computers|computers|Computer literature|Комп'ютерна література|Literatura komputerowa|Computerliteratur
+comp_hard|computers|Hardware|Комп'ютерне залізо|Sprzęt komputerowy|Hardware
+comp_www|computers|OS, Networks & Internet|ОС, мережі, інтернет|Systemy, sieci, internet|Betriebssysteme, Netze & Internet
+comp_db|computers|Programming & Databases|Програмування, бази даних|Programowanie i bazy danych|Programmierung & Datenbanken
+tbg_computers|computers|Tutorials|Навчальні посібники, самовчителі|Poradniki|Lehrgänge
+children|children|Children's literature|Дитяча література|Literatura dziecięca|Kinderliteratur
+child_education|children|Educational for children|Дитяча освітня література|Edukacja dla dzieci|Lernbücher für Kinder
+child_det|children|Children's action & mystery|Дитяча гостросюжетна література|Sensacja dla dzieci|Kinderkrimis
+foreign_children|children|Foreign children's literature|Зарубіжна література для дітей|Zagraniczna literatura dziecięca|Ausländische Kinderliteratur
+prose_game|children|Games & Activities for children|Ігри, вправи для дітей|Gry i zabawy dla dzieci|Spiele & Übungen für Kinder
+child_classical|children|Classic children's literature|Класична дитяча література|Klasyka dziecięca|Klassische Kinderliteratur
+child_prose|children|Children's prose|Проза для дітей|Proza dla dzieci|Kinderprosa
+child_tale_rus|children|Russian fairy tales|Російські казки|Baśnie rosyjskie|Russische Märchen
+child_tale|children|Fairy tales of the world|Казки народів світу|Baśnie świata|Märchen aus aller Welt
+child_verse|children|Poems for children|Вірші для дітей|Wiersze dla dzieci|Kindergedichte
+child_sf|children|Children's science fiction|Фантастика для дітей|Fantastyka dla dzieci|Kinder-Science-Fiction
+love_history|romance|Historical romance|Історичні любовні романи|Romans historyczny|Historische Liebesromane
+love_short|romance|Short romance|Короткі любовні романи|Krótkie romanse|Kurze Liebesromane
+love_sf|romance|Romantic fantasy|Любовне фентезі|Romans fantasy|Romantische Fantasy
+love|romance|Romance|Любовні романи|Romans|Liebesromane
+love_detective|romance|Romantic suspense|Гостросюжетні любовні романи|Romans sensacyjny|Romantische Spannung
+love_hard|romance|Adult|Для дорослих|Dla dorosłych|Nur für Erwachsene
+love_contemporary|romance|Contemporary romance|Сучасні любовні романи|Romans współczesny|Moderne Liebesromane
+love_erotica|romance|Erotica|Еротична література|Erotyka|Erotik
+sci_medicine_alternative|science|Alternative medicine|Альтернативна медицина|Medycyna alternatywna|Alternativmedizin
+sci_theories|science|Alternative theories|Альтернативні науки та теорії|Teorie alternatywne|Alternative Theorien
+sci_cosmos|science|Astronomy & Space|Астрономія і космос|Astronomia i kosmos|Astronomie & Raumfahrt
+sci_biology|science|Biology|Біологія, біофізика, біохімія|Biologia|Biologie
+sci_botany|science|Botany|Ботаніка|Botanika|Botanik
+sci_veterinary|science|Veterinary|Ветеринарія|Weterynaria|Tiermedizin
+military_history|science|Military history|Військова історія|Historia wojskowości|Militärgeschichte
+sci_oriental|science|Oriental studies|Сходознавство|Orientalistyka|Orientalistik
+sci_geo|science|Geology & Geography|Геологія та географія|Geologia i geografia|Geologie & Geographie
+sci_state|science|State & Law|Держава і право|Państwo i prawo|Staat & Recht
+sci_popular|science|Popular science|Науково-популярна література|Popularnonaukowe|Populärwissenschaft
+sci_zoo|science|Zoology|Зоологія|Zoologia|Zoologie
+sci_history|science|History|Історія|Historia|Geschichte
+sci_philology|science|Literary studies|Літературознавство|Literaturoznawstwo|Literaturwissenschaft
+sci_math|science|Mathematics|Математика|Matematyka|Mathematik
+sci_medicine|science|Medicine|Медицина|Medycyna|Medizin
+science|science|Science|Наукова література|Literatura naukowa|Wissenschaft
+sci_social_studies|science|Social studies|Суспільствознавство, соціологія|Socjologia|Sozialwissenschaften
+sci_politics|science|Politics|Політика|Polityka|Politik
+sci_psychology|science|Psychology|Психологія і психотерапія|Psychologia|Psychologie
+sci_phys|science|Physics|Фізика|Fizyka|Physik
+sci_philosophy|science|Philosophy|Філософія|Filozofia|Philosophie
+sci_chem|science|Chemistry|Хімія|Chemia|Chemie
+sci_ecology|science|Ecology|Екологія|Ekologia|Ökologie
+sci_economy|science|Economics|Економіка|Ekonomia|Wirtschaftswissenschaft
+sci_juris|science|Law|Юриспруденція|Prawo|Rechtswissenschaft
+sci_linguistic|science|Linguistics|Мовознавство, іноземні мови|Językoznawstwo|Sprachwissenschaft
+palindromes|poetry|Experimental poetry|Візуальна та експериментальна поезія|Poezja eksperymentalna|Experimentelle Lyrik
+poetry_for_classical|poetry|Classic foreign poetry|Класична зарубіжна поезія|Klasyczna poezja obca|Klassische ausländische Lyrik
+poetry_classical|poetry|Classic poetry|Класична поезія|Poezja klasyczna|Klassische Lyrik
+poetry_rus_classical|poetry|Classic Russian poetry|Класична російська поезія|Klasyczna poezja rosyjska|Klassische russische Lyrik
+lyrics|poetry|Lyric poetry|Лірика|Liryka|Liebeslyrik
+song_poetry|poetry|Song poetry|Пісенна поезія|Poezja śpiewana|Liedtexte
+poetry|poetry|Poetry|Поезія|Poezja|Lyrik
+poetry_east|poetry|Poetry of the East|Поезія Сходу|Poezja Wschodu|Lyrik des Orients
+poem|poetry|Epic poetry|Поема, епічна поезія|Poemat|Versepos
+poetry_for_modern|poetry|Modern foreign poetry|Сучасна зарубіжна поезія|Współczesna poezja obca|Moderne ausländische Lyrik
+poetry_modern|poetry|Modern poetry|Сучасна поезія|Poezja współczesna|Moderne Lyrik
+poetry_rus_modern|poetry|Modern Russian poetry|Сучасна російська поезія|Współczesna poezja rosyjska|Moderne russische Lyrik
+humor_verse|poetry|Humorous verse & Fables|Гумористичні вірші, байки|Wiersze humorystyczne, bajki|Humoristische Gedichte, Fabeln
+adv_story|adventure|Picaresque|Авантюрний роман|Powieść awanturnicza|Schelmenroman
+adv_indian|adventure|Western|Вестерн, про індіанців|Western|Western
+adv_history|adventure|Historical adventure|Історичні пригоди|Przygoda historyczna|Historische Abenteuer
+adv_maritime|adventure|Sea adventure|Морські пригоди|Przygody morskie|Seeabenteuer
+adventure|adventure|Adventure|Пригоди|Przygoda|Abenteuer
+adv_modern|adventure|Modern adventure|Пригоди в сучасному світі|Przygoda współczesna|Moderne Abenteuer
+child_adv|adventure|Adventure for kids & teens|Пригоди для дітей і підлітків|Przygody dla dzieci i młodzieży|Abenteuer für Kinder & Jugendliche
+adv_animal|adventure|Nature & Animals|Природа і тварини|Przyroda i zwierzęta|Natur & Tiere
+adv_geo|adventure|Travel & Geography|Подорожі та географія|Podróże i geografia|Reisen & Geographie
+tale_chivalry|adventure|Chivalric romance|Лицарський роман|Romans rycerski|Ritterroman
+aphorisms|prose|Aphorisms & Quotes|Афоризми, цитати|Aforyzmy i cytaty|Aphorismen & Zitate
+gothic_novel|prose|Gothic novel|Готичний роман|Powieść gotycka|Schauerroman
+foreign_prose|prose|Classic foreign prose|Зарубіжна класична проза|Klasyczna proza obca|Klassische ausländische Prosa
+prose_history|prose|Historical fiction|Історична проза|Proza historyczna|Historischer Roman
+prose_classic|prose|Classic prose|Класична проза|Proza klasyczna|Klassische Prosa
+literature_18|prose|17th–18th century prose|Класична проза XVII–XVIII ст.|Proza XVII–XVIII wieku|Prosa des 17.–18. Jh.
+literature_19|prose|19th century prose|Класична проза XIX ст.|Proza XIX wieku|Prosa des 19. Jh.
+literature_20|prose|20th century prose|Класична проза XX ст.|Proza XX wieku|Prosa des 20. Jh.
+prose_counter|prose|Counterculture|Контркультура|Kontrkultura|Gegenkultur
+prose_magic|prose|Magical realism|Магічний реалізм|Realizm magiczny|Magischer Realismus
+story|prose|Short stories & Essays|Малі форми: оповідання, есе, новели|Opowiadania i eseje|Kurzgeschichten & Essays
+prose|prose|Prose|Проза|Proza|Prosa
+prose_military|prose|War fiction|Проза про війну|Proza wojenna|Kriegsliteratur
+great_story|prose|Novel, Novella|Роман, повість|Powieść|Roman, Novelle
+prose_rus_classic|prose|Russian classic prose|Російська класична проза|Rosyjska proza klasyczna|Russische klassische Prosa
+prose_su_classics|prose|Soviet classic prose|Радянська класична проза|Radziecka proza klasyczna|Sowjetische klassische Prosa
+prose_contemporary|prose|Contemporary prose|Сучасна проза|Proza współczesna|Gegenwartsliteratur
+foreign_antique|prose|Medieval prose|Середньовічна класична проза|Proza średniowieczna|Mittelalterliche Prosa
+prose_abs|prose|Absurdist prose|Фантасмагорія, абсурдистська проза|Proza absurdu|Absurde Prosa
+prose_neformatny|prose|Experimental prose|Експериментальна проза|Proza eksperymentalna|Experimentelle Prosa
+epistolary_fiction|prose|Epistolary fiction|Епістолярна проза|Powieść epistolarna|Briefroman
+periodic|other|Magazines & Newspapers|Журнали, газети|Czasopisma i gazety|Zeitschriften & Zeitungen
+comics|other|Comics|Комікси|Komiksy|Comics
+unfinished|other|Unfinished|Незавершене|Niedokończone|Unvollendet
+other|other|Unsorted|Невідсортоване|Nieposortowane|Unsortiert
+network_literature|other|Self-published & Web fiction|Самвидав, мережева література|Literatura sieciowa|Selbstverlag & Webliteratur
+fanfiction|other|Fan fiction|Фанфік|Fanfiction|Fanfiction
+astrology|religion|Astrology & Palmistry|Астрологія і хіромантія|Astrologia i chiromancja|Astrologie & Handlesekunst
+religion_budda|religion|Buddhism|Буддизм|Buddyzm|Buddhismus
+religion_hinduism|religion|Hinduism|Індуїзм|Hinduizm|Hinduismus
+religion_islam|religion|Islam|Іслам|Islam|Islam
+religion_judaism|religion|Judaism|Юдаїзм|Judaizm|Judentum
+religion_catholicism|religion|Catholicism|Католицизм|Katolicyzm|Katholizismus
+religion_orthodoxy|religion|Orthodoxy|Православ'я|Prawosławie|Orthodoxie
+religion_protestantism|religion|Protestantism|Протестантизм|Protestantyzm|Protestantismus
+sci_religion|religion|Religious studies|Релігієзнавство|Religioznawstwo|Religionswissenschaft
+religion|religion|Religion|Релігія, релігійна література|Religia|Religion
+religion_self|religion|Self-improvement|Самовдосконалення|Samodoskonalenie|Selbstverbesserung
+religion_christianity|religion|Christianity|Християнство|Chrześcijaństwo|Christentum
+religion_esoterics|religion|Esoterics|Езотерика|Ezoteryka|Esoterik
+religion_paganism|religion|Paganism|Язичництво|Pogaństwo|Heidentum
+geo_guides|reference|Guides, Maps & Atlases|Путівники, карти, атласи|Przewodniki, mapy, atlasy|Reiseführer, Karten & Atlanten
+ref_guide|reference|Manuals|Посібники|Poradniki|Handbücher
+ref_dict|reference|Dictionaries|Словники|Słowniki|Wörterbücher
+reference|reference|Reference|Довідкова література|Literatura podręczna|Nachschlagewerke
+ref_ref|reference|Handbooks|Довідники|Informatory|Handbücher
+ref_encyc|reference|Encyclopedias|Енциклопедії|Encyklopedie|Enzyklopädien
+antique|antique|Ancient literature|Стародавня література|Literatura dawna|Alte Literatur
+antique_ant|antique|Classical antiquity|Антична література|Literatura antyczna|Antike Literatur
+antique_east|antique|Ancient Eastern literature|Давньосхідна література|Literatura starożytnego Wschodu|Altorientalische Literatur
+antique_russian|antique|Old Russian literature|Давньоруська література|Literatura staroruska|Altrussische Literatur
+antique_european|antique|Old European literature|Європейська старовинна література|Dawna literatura europejska|Alte europäische Literatur
+auto_business|technics|Automotive|Автосправа|Motoryzacja|Kfz-Technik
+military_weapon|technics|Military technology & Weapons|Військова техніка та озброєння|Technika wojskowa i uzbrojenie|Militärtechnik & Waffen
+equ_history|technics|History of technology|Історія техніки|Historia techniki|Technikgeschichte
+sci_metal|technics|Metallurgy|Металургія|Metalurgia|Metallurgie
+sci_radio|technics|Electronics|Радіоелектроніка|Radioelektronika|Elektronik
+sci_build|technics|Construction|Будівництво та опір матеріалів|Budownictwo|Bauwesen
+sci_tech|technics|Engineering|Технічні науки|Nauki techniczne|Ingenieurwissenschaften
+sci_transport|technics|Transport & Aviation|Транспорт і авіація|Transport i lotnictwo|Verkehr & Luftfahrt
+sci_textbook|textbooks|Textbooks|Підручники та посібники|Podręczniki|Lehrbücher
+tbg_higher|textbooks|University textbooks|Підручники для ВНЗ|Podręczniki akademickie|Hochschullehrbücher
+tbg_secondary|textbooks|Secondary & Vocational textbooks|Підручники для середньої та спеціальної освіти|Podręczniki dla szkół średnich i zawodowych|Lehrbücher für Sekundar- & Berufsschulen
+tbg_school|textbooks|School textbooks|Шкільні підручники, реферати|Podręczniki szkolne|Schulbücher
+sf_history|sf|Alternate history|Альтернативна історія, попаданці|Historia alternatywna|Alternative Geschichte
+sf_action|sf|Military SF|Бойова фантастика|Fantastyka militarna|Military-SF
+sf_heroic|sf|Heroic fantasy|Героїчна фантастика|Fantastyka heroiczna|Heroische Fantasy
+sf_fantasy_city|sf|Urban fantasy|Міське фентезі|Fantasy miejska|Urban Fantasy
+sf_detective|sf|SF mystery|Детективна фантастика|Fantastyka kryminalna|SF-Krimi
+sf_cyberpunk|sf|Cyberpunk|Кіберпанк|Cyberpunk|Cyberpunk
+sf_space|sf|Space fiction|Космічна фантастика|Fantastyka kosmiczna|Weltraum-SF
+sf_mystic|sf|Mysticism|Містика|Mistyka|Mystik
+fairy_fantasy|sf|Mythic fantasy|Міфологічне фентезі|Fantasy mitologiczna|Mythische Fantasy
+sf|sf|Science fiction|Наукова фантастика|Fantastyka naukowa|Science-Fiction
+sf_postapocalyptic|sf|Post-apocalyptic|Постапокаліпсис|Postapokalipsa|Postapokalyptik
+russian_fantasy|sf|Slavic fantasy|Слов'янське фентезі|Fantasy słowiańska|Slawische Fantasy
+modern_tale|sf|Modern fairy tale|Сучасна казка|Współczesna baśń|Modernes Märchen
+sf_social|sf|Social SF|Соціально-психологічна фантастика|Fantastyka społeczna|Soziale Science-Fiction
+sf_stimpank|sf|Steampunk|Стімпанк|Steampunk|Steampunk
+sf_technofantasy|sf|Technofantasy|Технофентезі|Technofantasy|Technofantasy
+sf_horror|sf|Horror|Жахи|Horror|Horror
+sf_etc|sf|Speculative fiction|Фантастика|Fantastyka|Phantastik
+sf_fantasy|sf|Fantasy|Фентезі|Fantasy|Fantasy
+hronoopera|sf|Chrono-opera|Хроноопера|Chronoopera|Zeitreise-Oper
+sf_epic|sf|Epic fantasy|Епічна фантастика|Fantastyka epicka|Epische Fantasy
+sf_humor|sf|Humorous SF|Гумористична фантастика|Fantastyka humorystyczna|Humoristische Phantastik
+epic|folklore|Epic tales, Byliny|Билини, епопея|Byliny, epopeja|Heldensagen, Epen
+child_folklore|folklore|Children's folklore|Дитячий фольклор|Folklor dziecięcy|Kinderfolklore
+antique_myths|folklore|Myths & Legends|Міфи, легенди, епос|Mity i legendy|Mythen & Legenden
+folk_songs|folklore|Folk songs|Народні пісні|Pieśni ludowe|Volkslieder
+folk_tale|folklore|Folk tales|Народні казки|Baśnie ludowe|Volksmärchen
+proverbs|folklore|Proverbs & Sayings|Прислів'я, приказки|Przysłowia i powiedzenia|Sprichwörter & Redensarten
+folklore|folklore|Folklore & Riddles|Фольклор, загадки|Folklor i zagadki|Folklore & Rätsel
+limerick|folklore|Limericks & Ditties|Частівки, примовки|Przyśpiewki i rymowanki|Limericks & Spottverse
+humor_anecdote|humor|Jokes|Анекдоти|Dowcipy|Witze
+humor_satire|humor|Satire|Сатира|Satyra|Satire
+humor|humor|Humor|Гумор|Humor|Humor
+humor_prose|humor|Humorous prose|Гумористична проза|Proza humorystyczna|Humoristische Prosa

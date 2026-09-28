@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Telegram.Bot" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Nopds.Infrastructure\Nopds.Infrastructure.csproj" />
+    <ProjectReference Include="..\Nopds.Conversion\Nopds.Conversion.csproj" />
+  </ItemGroup>
+
+</Project>
