@@ -15,7 +15,7 @@ function stored(): Theme {
 export function applyTheme(theme: Theme) {
   const dark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
   document.documentElement.classList.toggle('dark', dark)
-  document.querySelector('meta[name="theme-color"]:not([media])')?.setAttribute('content', dark ? '#1c1917' : '#fafaf9')
+  document.querySelector('meta[name="theme-color"]:not([media])')?.setAttribute('content', dark ? '#211a14' : '#fffcf6')
 }
 
 export function useTheme() {

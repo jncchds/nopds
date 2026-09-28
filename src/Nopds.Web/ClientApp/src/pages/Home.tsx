@@ -43,12 +43,12 @@ export default function Home() {
   return (
     <div className="space-y-10">
       <section>
-        <h1 className="font-serif text-3xl font-semibold tracking-tight">{config.data?.title}</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">{config.data?.title}</h1>
         <p className="mt-1 muted">{config.data?.subtitle}</p>
         {stats.error && <ErrorBox error={stats.error} />}
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mt-6 grid grid-cols-[repeat(auto-fit,minmax(7.5rem,1fr))] gap-3">
           {tiles.map((x) => (
-            <Link key={x.to} to={x.to} className="card p-4 transition-colors hover:border-accent-400">
+            <Link key={x.to} to={x.to} className="card p-4 transition-colors hover:border-accent">
               <div className="text-2xl font-semibold tabular-nums">{nf.format(x.value)}</div>
               <div className="text-sm muted">{x.label}</div>
             </Link>
@@ -62,7 +62,7 @@ export default function Home() {
             <h2 className="text-xl font-semibold">{t('home.continue')}</h2>
             <Link to="/shelf" className="link text-sm">{t('common.all')}</Link>
           </div>
-          <BookGrid books={reading.data.items.slice(0, 6).map((i) => i.book)} progress={Object.fromEntries(reading.data.items.map((i) => [i.book.id, i.progress]))} />
+          <BookGrid mode="grid" books={reading.data.items.slice(0, 6).map((i) => i.book)} progress={Object.fromEntries(reading.data.items.map((i) => [i.book.id, i.progress]))} />
         </section>
       )}
 
@@ -71,7 +71,7 @@ export default function Home() {
           <h2 className="text-xl font-semibold">{t('home.recent')}</h2>
           <Link to="/books?sort=added" className="link text-sm">{t('common.all')}</Link>
         </div>
-        {recent.isLoading ? <Loading /> : recent.data && <BookGrid books={recent.data.items} />}
+        {recent.isLoading ? <Loading /> : recent.data && <BookGrid mode="grid" books={recent.data.items} />}
       </section>
 
       {random.data && (
@@ -81,12 +81,12 @@ export default function Home() {
           </Link>
           <div className="min-w-0 flex-1">
             <div className="mb-1 flex items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold tracking-wide text-accent-700 uppercase dark:text-accent-300">{t('home.random')}</h2>
+              <h2 className="text-sm font-semibold tracking-wide text-accent uppercase">{t('home.random')}</h2>
               <button className="btn-ghost px-2 py-1" onClick={() => random.refetch()} title={t('home.another')}>
                 <Shuffle className="h-4 w-4" />
               </button>
             </div>
-            <Link to={`/book/${random.data.id}`} className="font-serif text-xl font-semibold hover:underline">{random.data.title}</Link>
+            <Link to={`/book/${random.data.id}`} className="text-xl font-semibold hover:underline">{random.data.title}</Link>
             <p className="muted">{random.data.authors.map((a) => displayName(a.name)).join(', ')}</p>
             {random.data.annotation && <p className="mt-3 line-clamp-4 text-sm">{random.data.annotation}</p>}
           </div>

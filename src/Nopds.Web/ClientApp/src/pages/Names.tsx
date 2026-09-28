@@ -52,8 +52,8 @@ export function NameList({ kind, items }: { kind: 'authors' | 'series'; items: {
   return (
     <ul className="grid gap-x-6 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((a) => (
-        <li key={a.id} className="border-b border-stone-200 dark:border-stone-800">
-          <Link to={`/${kind}/${a.id}`} className="flex items-baseline justify-between gap-3 py-2.5 hover:text-accent-700 dark:hover:text-accent-300">
+        <li key={a.id} className="border-b border-line">
+          <Link to={`/${kind}/${a.id}`} className="flex items-baseline justify-between gap-3 py-2.5 hover:text-accent">
             <span className="truncate">{a.name}</span>
             <span className="shrink-0 text-xs muted" title={t('common.count', { count: a.books })}>{a.books}</span>
           </Link>

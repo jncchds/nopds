@@ -20,14 +20,14 @@ export default function AuthorPage() {
     <>
       <PageTitle subtitle={author.data?.name}>{author.data ? displayName(author.data.name) : '…'}</PageTitle>
       {seriesItems.length > 0 && (
-        <div className="mb-6 flex gap-1 border-b border-stone-200 dark:border-stone-800" role="tablist">
+        <div className="mb-6 flex gap-1 border-b border-line" role="tablist">
           {(['all', 'series'] as const).map((x) => (
             <button
               key={x}
               role="tab"
               aria-selected={tab === x}
               onClick={() => setTab(x)}
-              className={clsx('-mb-px border-b-2 px-4 py-2 text-sm', tab === x ? 'border-accent-600 font-medium' : 'border-transparent muted')}
+              className={clsx('-mb-px border-b-2 px-4 py-2 text-sm', tab === x ? 'border-accent font-medium' : 'border-transparent muted')}
             >
               {t(x === 'all' ? 'author.allBooks' : 'author.bySeries')}
             </button>
@@ -40,7 +40,7 @@ export default function AuthorPage() {
         <ul className="space-y-2">
           {seriesItems.map((s) => (
             <li key={s.id}>
-              <Link to={`/series/${s.id}`} className="card flex items-center justify-between p-3 hover:border-accent-400">
+              <Link to={`/series/${s.id}`} className="card flex items-center justify-between p-3 hover:border-accent">
                 <span>{s.name}</span>
                 <span className="text-sm muted">{t('common.count', { count: s.books })}</span>
               </Link>

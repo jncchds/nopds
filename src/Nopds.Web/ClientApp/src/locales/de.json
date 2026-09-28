@@ -241,5 +241,10 @@
     "running": "Scanne…",
     "skipped": "Unverändert",
     "updated": "Aktualisiert"
+  },
+  "view": {
+    "label": "Ansicht",
+    "list": "Liste",
+    "grid": "Cover"
   }
 }

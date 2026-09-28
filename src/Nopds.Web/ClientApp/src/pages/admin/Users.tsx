@@ -25,13 +25,13 @@ export default function Users() {
       <div className="flex justify-end">
         <button className="btn-primary" onClick={() => setEditing('new')}><Plus className="h-4 w-4" /> {t('admin.addUser')}</button>
       </div>
-      <div className="card divide-y divide-stone-200 dark:divide-stone-800">
+      <div className="card divide-y divide-line">
         {users.data!.map((u) => (
           <div key={u.id} className="flex flex-wrap items-center gap-3 p-3">
             <div className="min-w-0 flex-1">
               <div className="font-medium">
                 {u.userName}
-                {u.isAdmin && <span className="ml-2 rounded bg-accent-100 px-1.5 py-0.5 text-xs text-accent-800 dark:bg-accent-900/50 dark:text-accent-200">{t('admin.admin')}</span>}
+                {u.isAdmin && <span className="ml-2 rounded bg-accent-faint px-1.5 py-0.5 text-xs text-accent">{t('admin.admin')}</span>}
                 {u.locked && <span className="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-800 dark:bg-red-900/50 dark:text-red-200">{t('admin.locked')}</span>}
               </div>
               <div className="text-xs muted">

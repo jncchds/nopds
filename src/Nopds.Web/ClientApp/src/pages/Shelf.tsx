@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
 import type { Page, ShelfItem } from '../api/types'
-import { BookGrid } from '../components/BookCard'
+import { BookGrid, ViewToggle } from '../components/BookCard'
 import { Empty, ErrorBox, Loading, LoadMore, PageTitle } from '../components/ui'
 
 export default function Shelf() {
@@ -25,9 +25,12 @@ export default function Shelf() {
       <PageTitle
         actions={
           items.length > 0 && (
+            <>
+            <ViewToggle />
             <button className="btn-ghost" onClick={() => confirm(t('shelf.confirmClear')) && clear.mutate()}>
               {t('shelf.clear')}
             </button>
+            </>
           )
         }
       >

@@ -2,7 +2,7 @@ import { Link, useParams, useSearchParams } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { Archive, FileArchive, Folder, ListTree } from 'lucide-react'
 import { useCatalog, useLibraries } from '../api/hooks'
-import { BookGrid } from '../components/BookCard'
+import { BookGrid, ViewToggle } from '../components/BookCard'
 import { Empty, ErrorBox, Loading, PageTitle } from '../components/ui'
 import type { CatalogNode } from '../api/types'
 
@@ -19,8 +19,8 @@ export default function Folders() {
         <PageTitle>{t('nav.folders')}</PageTitle>
         <div className="grid gap-3 sm:grid-cols-2">
           {libraries.data?.map((l) => (
-            <Link key={l.id} to={`/folders/${l.id}`} className="card flex items-center gap-3 p-4 hover:border-accent-400">
-              <Folder className="h-5 w-5 text-accent-600" />
+            <Link key={l.id} to={`/folders/${l.id}`} className="card flex items-center gap-3 p-4 hover:border-accent">
+              <Folder className="h-5 w-5 text-accent" />
               <span className="flex-1 font-medium">{l.name}</span>
               <span className="text-sm muted">{t('common.count', { count: l.books })}</span>
             </Link>
@@ -64,8 +64,8 @@ function FolderView({ libraryId, catalogId }: { libraryId: number; catalogId?: n
             const Icon = icons[c.type] ?? Folder
             return (
               <li key={c.id}>
-                <Link to={link(c)} className="card flex items-center gap-3 px-3 py-2.5 hover:border-accent-400">
-                  <Icon className="h-4 w-4 shrink-0 text-accent-600" />
+                <Link to={link(c)} className="card flex items-center gap-3 px-3 py-2.5 hover:border-accent">
+                  <Icon className="h-4 w-4 shrink-0 text-accent" />
                   <span className="truncate">{c.name}</span>
                 </Link>
               </li>
@@ -75,6 +75,7 @@ function FolderView({ libraryId, catalogId }: { libraryId: number; catalogId?: n
       )}
       {data.books.items.length > 0 ? (
         <>
+          <div className="mb-3 flex justify-end"><ViewToggle /></div>
           <BookGrid books={data.books.items} />
           <div className="mt-6 flex justify-center gap-2">
             {page > 1 && <button className="btn-secondary" onClick={() => setParams({ page: String(page - 1) })}>← {t('common.prev')}</button>}

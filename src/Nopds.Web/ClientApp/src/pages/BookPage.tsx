@@ -52,7 +52,7 @@ export default function BookPage() {
         </div>
         <div className="min-w-0 flex-1 space-y-4">
           <div>
-            <h1 className="font-serif text-3xl leading-tight font-semibold">{book.title}</h1>
+            <h1 className="text-3xl leading-tight font-semibold">{book.title}</h1>
             <p className="mt-2 text-lg">
               {book.authors.length === 0 && <span className="muted">{t('book.unknownAuthor')}</span>}
               {book.authors.map((a, i) => (
@@ -119,7 +119,7 @@ export default function BookPage() {
       {book.annotation && (
         <section>
           <h2 className="mb-2 text-lg font-semibold">{t('book.annotation')}</h2>
-          <div className="max-w-prose space-y-2 font-serif leading-relaxed">
+          <div className="max-w-prose space-y-2 leading-relaxed">
             {book.annotation.split('\n').map((p, i) => <p key={i}>{p}</p>)}
           </div>
         </section>
@@ -131,7 +131,7 @@ export default function BookPage() {
             {t('book.editions', { count: book.editions })}
           </button>
           {showEditions && (
-            <div className="mt-4">{editions.isLoading ? <Loading /> : <BookGrid books={editions.data?.items.filter((b) => b.id !== book.id) ?? []} />}</div>
+            <div className="mt-4">{editions.isLoading ? <Loading /> : <BookGrid mode="list" books={editions.data?.items.filter((b) => b.id !== book.id) ?? []} />}</div>
           )}
         </section>
       )}

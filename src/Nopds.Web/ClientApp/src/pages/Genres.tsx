@@ -22,7 +22,7 @@ export default function Genres() {
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {sections.data.map((s) => (
-              <Link key={s.key} to={`/genres/${s.key}`} className="card flex items-center justify-between p-4 hover:border-accent-400">
+              <Link key={s.key} to={`/genres/${s.key}`} className="card flex items-center justify-between p-4 hover:border-accent">
                 <span className="font-medium">{s.name}</span>
                 <span className="text-sm muted">{t('common.count', { count: s.books })}</span>
               </Link>
@@ -47,13 +47,13 @@ function GenreSection({ section }: { section: string }) {
     <>
       <PageTitle subtitle={<Link to="/genres" className="link">← {t('nav.genres')}</Link>}>{title}</PageTitle>
       <div className="mb-6 flex flex-wrap gap-2">
-        <button className={genreId === undefined ? 'chip border-accent-500 text-accent-700 dark:text-accent-300' : 'chip'} onClick={() => setParams({}, { replace: true })}>
+        <button className={genreId === undefined ? 'chip border-accent text-accent' : 'chip'} onClick={() => setParams({}, { replace: true })}>
           {t('common.all')}
         </button>
         {genres.data?.map((g) => (
           <button
             key={g.id}
-            className={genreId === g.id ? 'chip border-accent-500 text-accent-700 dark:text-accent-300' : 'chip'}
+            className={genreId === g.id ? 'chip border-accent text-accent' : 'chip'}
             onClick={() => setParams({ genre: String(g.id) }, { replace: true })}
           >
             {g.name} <span className="ml-1 muted">{g.books}</span>

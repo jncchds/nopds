@@ -114,8 +114,8 @@ export default function Reader() {
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex flex-col bg-stone-50 dark:bg-stone-950">
-      <header className="flex h-12 items-center gap-2 border-b border-stone-200 px-2 dark:border-stone-800">
+    <div className="fixed inset-0 z-40 flex flex-col bg-bg">
+      <header className="flex h-12 items-center gap-2 border-b border-line px-2">
         <Link to={`/book/${bookId}`} className="btn-ghost px-2" aria-label={t('common.back')}>
           <ArrowLeft className="h-5 w-5" />
         </Link>
@@ -133,11 +133,11 @@ export default function Reader() {
         )}
       </header>
       <div className="relative flex min-h-0 flex-1">
-        <button className="hidden w-12 items-center justify-center muted hover:text-accent-600 sm:flex" onClick={() => view.current?.goLeft()} aria-label={t('common.prev')}>
+        <button className="hidden w-12 items-center justify-center muted hover:text-accent sm:flex" onClick={() => view.current?.goLeft()} aria-label={t('common.prev')}>
           <ChevronLeft className="h-6 w-6" />
         </button>
         <div ref={host} className="min-w-0 flex-1" />
-        <button className="hidden w-12 items-center justify-center muted hover:text-accent-600 sm:flex" onClick={() => view.current?.goRight()} aria-label={t('common.next')}>
+        <button className="hidden w-12 items-center justify-center muted hover:text-accent sm:flex" onClick={() => view.current?.goRight()} aria-label={t('common.next')}>
           <ChevronRight className="h-6 w-6" />
         </button>
         {loading && (
@@ -151,14 +151,14 @@ export default function Reader() {
           </div>
         )}
         {tocOpen && (
-          <nav className="absolute inset-y-0 right-0 w-80 max-w-full overflow-y-auto border-l border-stone-200 bg-white p-3 shadow-xl dark:border-stone-800 dark:bg-stone-900">
+          <nav className="absolute inset-y-0 right-0 w-80 max-w-full overflow-y-auto border-l border-line bg-surface p-3 shadow-xl">
             <TocList items={toc} onPick={(href) => { view.current?.goTo(href); setTocOpen(false) }} />
           </nav>
         )}
       </div>
       <footer className="flex h-8 items-center gap-3 px-4 text-xs muted">
-        <div className="h-1 flex-1 overflow-hidden rounded bg-stone-200 dark:bg-stone-800">
-          <div className="h-full bg-accent-500 transition-all" style={{ width: `${fraction * 100}%` }} />
+        <div className="h-1 flex-1 overflow-hidden rounded bg-accent-faint">
+          <div className="h-full bg-accent transition-all" style={{ width: `${fraction * 100}%` }} />
         </div>
         <span className="tabular-nums">{Math.round(fraction * 100)}%</span>
       </footer>
@@ -171,7 +171,7 @@ function TocList({ items, onPick, depth = 0 }: { items: TocItem[]; onPick: (href
     <ul>
       {items.map((it, i) => (
         <li key={i}>
-          <button className="w-full rounded px-2 py-1.5 text-left text-sm hover:bg-stone-100 dark:hover:bg-stone-800" style={{ paddingLeft: 8 + depth * 14 }} onClick={() => onPick(it.href)}>
+          <button className="w-full rounded px-2 py-1.5 text-left text-sm hover:bg-accent-faint" style={{ paddingLeft: 8 + depth * 14 }} onClick={() => onPick(it.href)}>
             {it.label}
           </button>
           {it.subitems && <TocList items={it.subitems} onPick={onPick} depth={depth + 1} />}

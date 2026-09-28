@@ -124,7 +124,7 @@ export default function Settings() {
             <CopyField label={t('settings.opds2')} value={feedToken ? `${origin}/opds/t/${feedToken}/v2/` : ''} />
             <button className="btn-ghost" onClick={regenerate}><RefreshCw className="h-4 w-4" /> {t('settings.regenerate')}</button>
           </div>
-          {qr && <img src={qr} alt={t('settings.qr')} className="h-44 w-44 self-center rounded-lg bg-white p-1" />}
+          {qr && <img src={qr} alt={t('settings.qr')} className="h-44 w-44 self-center rounded-lg bg-surface p-1" />}
         </div>
       </Section>
 

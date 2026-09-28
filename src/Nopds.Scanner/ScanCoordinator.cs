@@ -142,7 +142,20 @@ public sealed class ScanCoordinator(
         {
             await using var scope = scopes.CreateAsyncScope();
             var db = scope.ServiceProvider.GetRequiredService<NopdsDbContext>();
-            var summary = progress.State == ScanState.Completed ? progress.Summary() : $"{progress.State}: {progress.Message}";
+            // Stored as JSON counters so the UI can localize it.
+            var summary = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                state = progress.State.ToString().ToLowerInvariant(),
+                added = progress.BooksAdded,
+                updated = progress.BooksUpdated,
+                skipped = progress.BooksSkipped,
+                deleted = progress.BooksDeleted,
+                restored = progress.BooksRestored,
+                archivesScanned = progress.ArchivesScanned,
+                archivesSkipped = progress.ArchivesSkipped,
+                errors = progress.Errors,
+                message = progress.Message,
+            });
             await db.Libraries.Where(l => l.Id == progress.LibraryId).ExecuteUpdateAsync(s => s
                 .SetProperty(l => l.LastScanFinishedAt, progress.FinishedAt)
                 .SetProperty(l => l.LastScanSummary, summary.Length > 1000 ? summary[..1000] : summary));

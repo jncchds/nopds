@@ -9,7 +9,7 @@ export const LANG_CODES: LangCode[] = ['all', 'cyrillic', 'latin', 'digits', 'ot
 export function LangTabs({ value, onChange }: { value: LangCode; onChange: (v: LangCode) => void }) {
   const { t } = useTranslation()
   return (
-    <div className="mb-4 flex flex-wrap gap-1 rounded-lg bg-stone-200/60 p-1 dark:bg-stone-800/60" role="tablist">
+    <div className="mb-4 flex flex-wrap gap-1 rounded-lg bg-accent-faint p-1" role="tablist">
       {LANG_CODES.map((c) => (
         <button
           key={c}
@@ -18,7 +18,7 @@ export function LangTabs({ value, onChange }: { value: LangCode; onChange: (v: L
           onClick={() => onChange(c)}
           className={clsx(
             'rounded-md px-3 py-1.5 text-sm transition-colors',
-            value === c ? 'bg-white font-medium shadow-sm dark:bg-stone-900' : 'muted hover:text-stone-900 dark:hover:text-stone-100',
+            value === c ? 'bg-surface font-medium shadow-sm' : 'muted hover:text-fg',
           )}
         >
           {t(`alphabet.${c}`)}
@@ -66,7 +66,7 @@ export function AlphabetBar({
             className={clsx(
               'min-w-9 rounded-md border px-2 py-1 text-sm transition-colors',
               g.count > split ? 'border-dashed' : '',
-              'border-stone-300 hover:border-accent-500 hover:text-accent-700 dark:border-stone-700 dark:hover:text-accent-300',
+              'border-line hover:border-accent hover:text-accent',
             )}
           >
             {g.prefix}

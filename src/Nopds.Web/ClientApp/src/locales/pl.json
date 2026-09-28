@@ -247,5 +247,10 @@
     "running": "Skanowanie…",
     "skipped": "Bez zmian",
     "updated": "Zaktualizowano"
+  },
+  "view": {
+    "label": "Widok",
+    "list": "Lista",
+    "grid": "Okładki"
   }
 }

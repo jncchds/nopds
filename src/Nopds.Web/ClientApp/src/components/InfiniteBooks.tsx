@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useBooks, type BookFilter } from '../api/hooks'
-import { BookGrid } from './BookCard'
+import { BookGrid, ViewToggle } from './BookCard'
 import { Empty, ErrorBox, Loading, LoadMore } from './ui'
 
 /** Infinite-scrolling cover grid for any book filter. */
@@ -13,6 +13,7 @@ export function InfiniteBooks({ filter, enabled = true }: { filter: BookFilter; 
   if (books.length === 0) return <Empty>{t('common.noBooks')}</Empty>
   return (
     <>
+      <div className="mb-3 flex justify-end"><ViewToggle /></div>
       <BookGrid books={books} />
       <LoadMore onVisible={() => q.fetchNextPage()} loading={q.isFetchingNextPage} hasMore={!!q.hasNextPage} />
     </>

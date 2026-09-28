@@ -1,7 +1,7 @@
 import { useSearchParams } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useBooks, useNames } from '../api/hooks'
-import { BookGrid } from '../components/BookCard'
+import { BookGrid, ViewToggle } from '../components/BookCard'
 import { Empty, Loading, LoadMore, PageTitle } from '../components/ui'
 import { NameList } from './Names'
 
@@ -40,7 +40,7 @@ export default function Search() {
       )}
       {bookItems.length > 0 && (
         <section>
-          <h2 className="mb-4 text-lg font-semibold">{t('nav.books')}</h2>
+          <div className="mb-4 flex items-center justify-between"><h2 className="text-lg font-semibold">{t('nav.books')}</h2><ViewToggle /></div>
           <BookGrid books={bookItems} />
           <LoadMore onVisible={() => books.fetchNextPage()} loading={books.isFetchingNextPage} hasMore={!!books.hasNextPage} />
         </section>

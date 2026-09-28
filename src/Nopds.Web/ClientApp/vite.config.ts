@@ -25,8 +25,8 @@ export default defineConfig({
         display: 'standalone',
         display_override: ['window-controls-overlay', 'standalone'],
         orientation: 'any',
-        theme_color: '#b75a18',
-        background_color: '#fafaf9',
+        theme_color: '#8f4f17',
+        background_color: '#f6f1e8',
         categories: ['books', 'education', 'entertainment'],
         icons: [
           { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png' },

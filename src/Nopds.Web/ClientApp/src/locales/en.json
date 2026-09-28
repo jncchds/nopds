@@ -241,5 +241,10 @@
     "running": "Scanning…",
     "skipped": "Unchanged",
     "updated": "Updated"
+  },
+  "view": {
+    "label": "View",
+    "list": "List",
+    "grid": "Covers"
   }
 }

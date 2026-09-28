@@ -2,73 +2,136 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-serif: 'Literata', Georgia, 'Times New Roman', serif;
-  --color-accent-50: #fdf6ec;
-  --color-accent-100: #f9e7cc;
-  --color-accent-200: #f2cc94;
-  --color-accent-300: #eaaf5c;
-  --color-accent-400: #e39537;
-  --color-accent-500: #d4761f;
-  --color-accent-600: #b75a18;
-  --color-accent-700: #924317;
-  --color-accent-800: #773719;
-  --color-accent-900: #622f18;
+/*
+ * Layout and components follow ABook (sidebar app shell, flat cards, pills);
+ * the palette is a warm "reading room": paper and ink by day, walnut and brass at night.
+ */
+:root {
+  --bg: #f6f1e8;
+  --surface: #fffcf6;
+  --surface-2: #efe7da;
+  --border: #e2d6c3;
+  --text: #2b2118;
+  --text-muted: #76675a;
+  --input-bg: #fbf8f2;
+  --accent: #8f4f17;
+  --accent-hover: #a8621f;
+  --accent-contrast: #fffaf2;
+  --accent-faint: #8f4f171a;
+  --leaf: #3f6b4f;
+  --leaf-faint: #3f6b4f1a;
+  --danger: #b42318;
+  --success: #2f7a45;
+  --warning: #b7791f;
+  font-family: 'Inter Variable', Inter, system-ui, sans-serif;
+}
+
+.dark {
+  --bg: #15110d;
+  --surface: #211a14;
+  --surface-2: #2b221a;
+  --border: #3b3026;
+  --text: #ece2d2;
+  --text-muted: #a6978a;
+  --input-bg: #15110d;
+  --accent: #d19a4f;
+  --accent-hover: #e2b06b;
+  --accent-contrast: #1a130c;
+  --accent-faint: #d19a4f24;
+  --leaf: #86b59a;
+  --leaf-faint: #86b59a1f;
+  --danger: #f07167;
+  --success: #6fcf8a;
+  --warning: #f2b64f;
+}
+
+@theme inline {
+  --font-sans: 'Inter Variable', Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Literata Variable', Literata, Georgia, serif;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--border);
+  --color-fg: var(--text);
+  --color-muted: var(--text-muted);
+  --color-input: var(--input-bg);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-accent-faint: var(--accent-faint);
+  --color-leaf: var(--leaf);
+  --color-leaf-faint: var(--leaf-faint);
+  --color-danger: var(--danger);
 }
 
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
   }
   body {
-    @apply bg-stone-50 text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100;
+    @apply bg-bg text-fg antialiased;
   }
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-accent-500;
+    @apply outline-2 outline-offset-2 outline-accent;
   }
 }
 
 @utility btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  @apply inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
 }
 
 @utility btn-primary {
-    @apply btn bg-accent-600 text-white hover:bg-accent-700 dark:bg-accent-500 dark:hover:bg-accent-400 dark:text-stone-950;
+  @apply btn bg-accent text-accent-contrast hover:bg-accent-hover;
 }
 
 @utility btn-secondary {
-    @apply btn border border-stone-300 bg-white text-stone-800 hover:bg-stone-100 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100 dark:hover:bg-stone-800;
+  @apply btn border border-line bg-transparent font-medium text-muted hover:border-accent hover:text-fg;
 }
 
 @utility btn-ghost {
-    @apply btn text-stone-700 hover:bg-stone-200/70 dark:text-stone-300 dark:hover:bg-stone-800;
+  @apply btn font-medium text-muted hover:bg-accent-faint hover:text-fg;
 }
 
 @utility btn-danger {
-    @apply btn bg-red-600 text-white hover:bg-red-700;
+  @apply btn border border-danger/30 bg-danger/10 text-danger hover:bg-danger/20;
 }
 
 @utility input {
-    @apply w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm placeholder:text-stone-400 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/30 dark:border-stone-700 dark:bg-stone-900;
+  @apply w-full rounded-md border border-line bg-input px-2.5 py-1.5 text-sm text-fg placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/25;
 }
 
 @utility card {
-    @apply rounded-xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900;
+  @apply rounded-[10px] border border-line bg-surface;
 }
 
 @utility chip {
-    @apply inline-flex items-center rounded-full border border-stone-300 px-2.5 py-0.5 text-xs text-stone-700 hover:border-accent-500 hover:text-accent-700 dark:border-stone-700 dark:text-stone-300 dark:hover:text-accent-300;
+  @apply inline-flex items-center rounded px-2 py-0.5 text-xs text-accent bg-accent-faint hover:bg-accent/20;
+}
+
+@utility pill-muted {
+  @apply inline-flex items-center rounded px-2 py-0.5 text-xs text-muted bg-muted/10;
+}
+
+@utility pill-leaf {
+  @apply inline-flex items-center rounded px-2 py-0.5 text-xs text-leaf bg-leaf-faint;
 }
 
 @utility link {
-    @apply text-accent-700 hover:underline dark:text-accent-300;
+  @apply text-accent hover:underline;
 }
 
 @utility label {
-    @apply mb-1 block text-sm font-medium text-stone-700 dark:text-stone-300;
+  @apply mb-1 block text-sm font-medium text-muted;
 }
 
 @utility muted {
-    @apply text-stone-500 dark:text-stone-400;
+  @apply text-muted;
+}
+
+@utility sidebar-btn {
+  @apply flex w-full items-center gap-2 overflow-hidden rounded-md px-2 py-[0.42rem] text-left text-sm leading-snug whitespace-nowrap text-fg transition-colors hover:bg-accent-faint;
 }

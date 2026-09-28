@@ -39,7 +39,7 @@ function Guard({ children, user, admin }: { children: ReactNode; user?: boolean;
 
 function NotFound() {
   const { t } = useTranslation()
-  return <div className="py-24 text-center"><h1 className="font-serif text-4xl font-semibold">404</h1><p className="mt-2 muted">{t('common.notFound')}</p></div>
+  return <div className="py-24 text-center"><h1 className="text-4xl font-semibold">404</h1><p className="mt-2 muted">{t('common.notFound')}</p></div>
 }
 
 export default function App() {

@@ -86,11 +86,7 @@ export default function Libraries() {
             {s && s.state !== 'idle' ? (
               <ScanLine s={s} lang={i18n.language} />
             ) : (
-              l.lastScanFinishedAt && (
-                <p className="mt-3 text-xs muted">
-                  {t('admin.lastScan')}: {formatDateTime(l.lastScanFinishedAt, i18n.language)} — {l.lastScanSummary}
-                </p>
-              )
+              l.lastScanFinishedAt && <LastScan at={l.lastScanFinishedAt} summary={l.lastScanSummary} lang={i18n.language} />
             )}
           </div>
         )
@@ -100,12 +96,39 @@ export default function Libraries() {
   )
 }
 
+function LastScan({ at, summary, lang }: { at: string; summary?: string; lang: string }) {
+  const { t } = useTranslation()
+  let parsed: Record<string, number | string> | null = null
+  try {
+    parsed = summary?.startsWith('{') ? JSON.parse(summary) : null
+  } catch {
+    parsed = null
+  }
+  const nf = new Intl.NumberFormat(lang)
+  return (
+    <p className="mt-3 text-xs muted">
+      {t('admin.lastScan')}: {formatDateTime(at, lang)}
+      {parsed ? (
+        <>
+          {' — '}
+          {t(`scan.${parsed.state}`)} · +{nf.format(Number(parsed.added))} · {t('scan.updated')}: {nf.format(Number(parsed.updated))} ·{' '}
+          {t('scan.skipped')}: {nf.format(Number(parsed.skipped))} · −{nf.format(Number(parsed.deleted))}
+          {Number(parsed.errors) > 0 && ` · ${t('scan.errors')}: ${parsed.errors}`}
+          {parsed.message && ` · ${parsed.message}`}
+        </>
+      ) : (
+        summary && ` — ${summary}`
+      )}
+    </p>
+  )
+}
+
 function ScanLine({ s, lang }: { s: ScanStatus; lang: string }) {
   const { t } = useTranslation()
   const running = s.state === 'running'
   const nf = new Intl.NumberFormat(lang)
   return (
-    <div className="mt-3 rounded-lg bg-stone-100 p-3 text-xs dark:bg-stone-800/60">
+    <div className="mt-3 rounded-lg bg-accent-faint p-3 text-xs">
       <div className="mb-1 flex items-center gap-2 font-medium">
         {running && <Spinner className="h-3.5 w-3.5" />}
         {t(`scan.${s.state}`)}
@@ -199,7 +222,7 @@ function LibraryForm({ initial, id, onClose }: { initial: LibraryInput; id?: num
           <Toggle checked={v.deleteLogical} onChange={(x) => set('deleteLogical', x)} label={t('admin.softDelete')} hint={t('admin.softDeleteHint')} />
           <Toggle checked={v.hashContent} onChange={(x) => set('hashContent', x)} label={t('admin.hash')} hint={t('admin.hashHint')} />
         </div>
-        <div className="flex justify-end gap-2 border-t border-stone-200 pt-4 dark:border-stone-800">
+        <div className="flex justify-end gap-2 border-t border-line pt-4">
           <button type="button" className="btn-ghost" onClick={onClose}>{t('common.cancel')}</button>
           <button className="btn-primary" disabled={save.isPending}>{t('common.save')}</button>
         </div>
@@ -232,12 +255,12 @@ function FolderPicker({ start, onPick, onClose }: { start: string; onPick: (p: s
       {q.error && <ErrorBox error={q.error} />}
       <ul className="max-h-80 overflow-y-auto">
         {q.data?.parent && (
-          <li><button className="w-full rounded px-2 py-1.5 text-left hover:bg-stone-100 dark:hover:bg-stone-800" onClick={() => setPath(q.data!.parent!)}>..</button></li>
+          <li><button className="w-full rounded px-2 py-1.5 text-left hover:bg-accent-faint" onClick={() => setPath(q.data!.parent!)}>..</button></li>
         )}
         {q.data?.entries.map((e) => (
           <li key={e.path}>
-            <button className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-stone-100 dark:hover:bg-stone-800" onClick={() => setPath(e.path)}>
-              <Folder className="h-4 w-4 text-accent-600" /> {e.name}
+            <button className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-accent-faint" onClick={() => setPath(e.path)}>
+              <Folder className="h-4 w-4 text-accent" /> {e.name}
             </button>
           </li>
         ))}

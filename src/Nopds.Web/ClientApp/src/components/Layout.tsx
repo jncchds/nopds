@@ -1,19 +1,31 @@
-import { useState, type FormEvent } from 'react'
-import { Link, NavLink, Outlet, useNavigate } from 'react-router'
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
-import {
-  BookOpen, Bookmark, FolderTree, Home, LibraryBig, LogIn, LogOut, Menu, Monitor, Moon, Search, Settings, Shield, Sun, Tags, Users, X,
-} from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import { useConfig, useLibraries } from '../api/hooks'
+import { api } from '../api/client'
+import type { Page, ShelfItem } from '../api/types'
 import { useLibrary } from '../hooks/useLibrary'
 import { useTheme, type Theme } from '../hooks/useTheme'
 import { LANGUAGES, rememberLanguage } from '../i18n'
-import { api } from '../api/client'
+import { displayName } from '../lib/format'
 import { UpdatePrompt } from './UpdatePrompt'
-import { Logo } from './Logo'
 
+const COLLAPSE_KEY = 'nopds.sidebar'
+
+function initialCollapsed() {
+  try {
+    const v = localStorage.getItem(COLLAPSE_KEY)
+    if (v !== null) return v === '1'
+  } catch {
+    /* ignore */
+  }
+  return window.matchMedia('(max-width: 768px)').matches
+}
+
+/** App shell modelled on ABook: collapsible sidebar with navigation, sections and account controls. */
 export function Layout() {
   const { t, i18n } = useTranslation()
   const { user, logout, setUser } = useAuth()
@@ -21,26 +33,46 @@ export function Layout() {
   const libraries = useLibraries()
   const { library, setLibrary } = useLibrary()
   const { theme, setTheme } = useTheme()
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(initialCollapsed)
   const [query, setQuery] = useState('')
   const navigate = useNavigate()
+  const location = useLocation()
+  const reading = useQuery({
+    queryKey: ['shelf', 'sidebar'],
+    queryFn: () => api<Page<ShelfItem>>('/shelf', { query: { unfinished: true } }),
+    enabled: !!user,
+    staleTime: 60_000,
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(COLLAPSE_KEY, collapsed ? '1' : '0')
+    } catch {
+      /* ignore */
+    }
+  }, [collapsed])
+
+  // On phones the expanded sidebar overlays content; close it after navigating.
+  useEffect(() => {
+    if (window.matchMedia('(max-width: 768px)').matches) setCollapsed(true)
+  }, [location.pathname])
 
   const nav = [
-    { to: '/', icon: Home, label: t('nav.home'), end: true },
-    { to: '/books', icon: BookOpen, label: t('nav.books') },
-    { to: '/authors', icon: Users, label: t('nav.authors') },
-    { to: '/series', icon: LibraryBig, label: t('nav.series') },
-    { to: '/genres', icon: Tags, label: t('nav.genres') },
-    { to: '/folders', icon: FolderTree, label: t('nav.folders') },
-    ...(user ? [{ to: '/shelf', icon: Bookmark, label: t('nav.shelf') }] : []),
-    ...(user?.isAdmin ? [{ to: '/admin', icon: Shield, label: t('nav.admin') }] : []),
+    { to: '/', icon: '🏠', label: t('nav.home'), end: true },
+    { to: '/books', icon: '📖', label: t('nav.books') },
+    { to: '/authors', icon: '👤', label: t('nav.authors') },
+    { to: '/series', icon: '📚', label: t('nav.series') },
+    { to: '/genres', icon: '🏷️', label: t('nav.genres') },
+    { to: '/folders', icon: '🗂️', label: t('nav.folders') },
+    ...(user ? [{ to: '/shelf', icon: '🔖', label: t('nav.shelf') }] : []),
+    ...(user ? [{ to: '/settings', icon: '⚙️', label: t('nav.settings') }] : []),
+    ...(user?.isAdmin ? [{ to: '/admin', icon: '🛡️', label: t('nav.admin') }] : []),
   ]
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
     const q = query.trim()
     if (q) navigate(`/search?q=${encodeURIComponent(q)}`)
-    setMenuOpen(false)
   }
 
   const changeLanguage = async (lang: string) => {
@@ -55,119 +87,174 @@ export function Layout() {
     }
   }
 
-  const themes: { value: Theme; icon: typeof Sun; label: string }[] = [
-    { value: 'system', icon: Monitor, label: t('theme.system') },
-    { value: 'light', icon: Sun, label: t('theme.light') },
-    { value: 'dark', icon: Moon, label: t('theme.dark') },
-  ]
-  const nextTheme = themes[(themes.findIndex((x) => x.value === theme) + 1) % themes.length]
-  const ThemeIcon = themes.find((x) => x.value === theme)!.icon
+  const themes: Theme[] = ['system', 'light', 'dark']
+  const nextTheme = themes[(themes.indexOf(theme) + 1) % themes.length]
+  const libs = libraries.data ?? []
+  const continueItems = reading.data?.items.slice(0, 8) ?? []
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex h-dvh overflow-hidden">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 btn-primary">{t('nav.skip')}</a>
-      <header className="sticky top-0 z-30 border-b border-stone-200 bg-stone-50/90 backdrop-blur dark:border-stone-800 dark:bg-stone-950/90">
-        <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4">
-          <button className="btn-ghost px-2 lg:hidden" onClick={() => setMenuOpen((v) => !v)} aria-label={t('nav.menu')} aria-expanded={menuOpen}>
-            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      <aside
+        className={clsx(
+          'z-30 flex shrink-0 flex-col overflow-hidden border-r border-line bg-surface transition-[width] duration-200',
+          collapsed ? 'w-12' : 'w-[min(75vw,15rem)] max-md:absolute max-md:inset-y-0 max-md:left-0 max-md:shadow-2xl',
+        )}
+      >
+        <div className="shrink-0 px-1 pt-1.5 pb-1">
+          <button className="sidebar-btn" onClick={() => setCollapsed((v) => !v)} title={t('nav.menu')} aria-expanded={!collapsed}>
+            <span className="w-[22px] shrink-0 text-center">☰</span>
+            <Label collapsed={collapsed}>
+              <span className="font-semibold">{config.data?.title ?? '.NET OPDS'}</span>
+            </Label>
+            {!collapsed && config.data?.version && (
+              <a
+                href="https://github.com/jncchds/nopds"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="shrink-0 rounded-full border border-accent/25 bg-accent-faint px-1.5 text-[0.65rem] leading-relaxed text-muted no-underline hover:text-accent"
+              >
+                v{config.data.version}
+              </a>
+            )}
           </button>
-          <Link to="/" className="flex shrink-0 items-center gap-2 font-serif text-lg font-semibold">
-            <Logo className="h-7 w-7" />
-            <span className="hidden sm:inline">{config.data?.title ?? '.NET OPDS'}</span>
-          </Link>
-          <form onSubmit={submit} className="relative ml-auto w-full max-w-md" role="search">
-            <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-stone-400" />
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={t('search.placeholder')}
-              className="input pl-9"
-              aria-label={t('search.placeholder')}
-            />
-          </form>
-          <button className="btn-ghost px-2" onClick={() => setTheme(nextTheme.value)} title={`${t('theme.label')}: ${themes.find((x) => x.value === theme)!.label}`}>
-            <ThemeIcon className="h-5 w-5" />
-          </button>
-          {user ? (
-            <div className="hidden items-center gap-1 sm:flex">
-              <Link to="/settings" className="btn-ghost px-2" title={t('nav.settings')}>
-                <Settings className="h-5 w-5" />
-              </Link>
-              <button className="btn-ghost px-2" onClick={() => logout().then(() => navigate('/'))} title={t('auth.logout')}>
-                <LogOut className="h-5 w-5" />
-              </button>
-            </div>
-          ) : (
-            <Link to="/login" className="btn-secondary hidden sm:inline-flex">
-              <LogIn className="h-4 w-4" /> {t('auth.login')}
+          {collapsed ? (
+            <Link to="/search" className="sidebar-btn" title={t('search.placeholder')}>
+              <span className="w-[22px] shrink-0 text-center">🔍</span>
             </Link>
+          ) : (
+            <form onSubmit={submit} role="search" className="px-1 pt-1">
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t('search.placeholder')}
+                aria-label={t('search.placeholder')}
+                className="input"
+              />
+            </form>
           )}
         </div>
-      </header>
 
-      <div className="mx-auto flex w-full max-w-7xl flex-1">
-        <aside
-          className={clsx(
-            'fixed inset-y-0 left-0 z-20 w-64 shrink-0 border-r border-stone-200 bg-stone-50 pt-14 transition-transform lg:sticky lg:top-14 lg:h-[calc(100dvh-3.5rem)] lg:translate-x-0 lg:border-0 lg:bg-transparent lg:pt-0 dark:border-stone-800 dark:bg-stone-950 lg:dark:bg-transparent',
-            menuOpen ? 'translate-x-0' : '-translate-x-full',
+        <nav className="flex-1 overflow-x-hidden overflow-y-auto px-1 py-0.5" aria-label={t('nav.main')}>
+          {nav.map((n) => (
+            <NavLink
+              key={n.to}
+              to={n.to}
+              end={n.end}
+              title={n.label}
+              className={({ isActive }) => clsx('sidebar-btn', isActive && 'bg-accent-faint text-accent')}
+            >
+              <span className="w-[22px] shrink-0 text-center">{n.icon}</span>
+              <Label collapsed={collapsed}>{n.label}</Label>
+            </NavLink>
+          ))}
+
+          {!collapsed && libs.length > 1 && (
+            <>
+              <Divider />
+              <SectionTitle>{t('nav.library')}</SectionTitle>
+              <SidebarEntry icon="🏛️" title={t('nav.allLibraries')} active={library === undefined} onClick={() => setLibrary(undefined)} />
+              {libs.map((l) => (
+                <SidebarEntry
+                  key={l.id}
+                  icon="📚"
+                  title={l.name}
+                  subtitle={t('common.count', { count: l.books })}
+                  active={library === l.id}
+                  onClick={() => setLibrary(l.id)}
+                />
+              ))}
+            </>
           )}
-        >
-          <nav className="flex h-full flex-col gap-1 overflow-y-auto p-3" aria-label={t('nav.main')}>
-            {(libraries.data?.length ?? 0) > 1 && (
-              <label className="mb-2 block">
-                <span className="mb-1 block px-2 text-xs font-medium tracking-wide uppercase muted">{t('nav.library')}</span>
-                <select className="input" value={library ?? ''} onChange={(e) => setLibrary(e.target.value ? Number(e.target.value) : undefined)}>
-                  <option value="">{t('nav.allLibraries')}</option>
-                  {libraries.data!.map((l) => (
-                    <option key={l.id} value={l.id}>{l.name}</option>
-                  ))}
-                </select>
-              </label>
-            )}
-            {nav.map(({ to, icon: Icon, label, end }) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={end}
-                onClick={() => setMenuOpen(false)}
-                className={({ isActive }) =>
-                  clsx(
-                    'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
-                    isActive ? 'bg-accent-100 font-medium text-accent-800 dark:bg-accent-900/40 dark:text-accent-200' : 'hover:bg-stone-200/70 dark:hover:bg-stone-800',
-                  )
-                }
-              >
-                <Icon className="h-4 w-4" /> {label}
-              </NavLink>
-            ))}
-            <div className="mt-auto space-y-2 border-t border-stone-200 pt-3 dark:border-stone-800">
-              {user ? (
-                <div className="flex items-center justify-between gap-2 px-2 sm:hidden">
-                  <Link to="/settings" className="link text-sm" onClick={() => setMenuOpen(false)}>{user.userName}</Link>
-                  <button className="btn-ghost px-2 py-1 text-sm" onClick={() => logout().then(() => navigate('/'))}>{t('auth.logout')}</button>
-                </div>
-              ) : (
-                <Link to="/login" className="btn-secondary w-full sm:hidden" onClick={() => setMenuOpen(false)}>{t('auth.login')}</Link>
-              )}
-              <label className="block px-2">
-                <span className="sr-only">{t('settings.language')}</span>
-                <select className="input py-1.5" value={i18n.language} onChange={(e) => changeLanguage(e.target.value)}>
-                  {LANGUAGES.map((l) => (
-                    <option key={l.code} value={l.code}>{l.name}</option>
-                  ))}
-                </select>
-              </label>
-              <p className="px-2 text-[11px] muted">.NET OPDS by CHDS {config.data?.version && `· v${config.data.version}`}</p>
-            </div>
-          </nav>
-        </aside>
-        {menuOpen && <div className="fixed inset-0 z-10 bg-black/30 lg:hidden" onClick={() => setMenuOpen(false)} />}
-        <main id="main" className="min-w-0 flex-1 px-4 py-6 lg:px-8">
+
+          {!collapsed && continueItems.length > 0 && (
+            <>
+              <Divider />
+              <SectionTitle>{t('home.continue')}</SectionTitle>
+              {continueItems.map((i) => (
+                <SidebarEntry
+                  key={i.book.id}
+                  icon="📖"
+                  title={i.book.title}
+                  subtitle={[i.progress >= 0.01 ? `${Math.round(i.progress * 100)}%` : null, i.book.authors.map((a) => displayName(a.name)).join(', ')].filter(Boolean).join(' · ')}
+                  active={location.pathname === `/book/${i.book.id}`}
+                  onClick={() => navigate(`/book/${i.book.id}`)}
+                />
+              ))}
+            </>
+          )}
+        </nav>
+
+        <div className="shrink-0 border-t border-line px-1 pt-1 pb-2">
+          {!collapsed && (
+            <label className="block px-1 pb-1">
+              <span className="sr-only">{t('settings.language')}</span>
+              <select className="input py-1" value={i18n.language} onChange={(e) => changeLanguage(e.target.value)}>
+                {LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code}>🌐 {l.name}</option>
+                ))}
+              </select>
+            </label>
+          )}
+          {user ? (
+            <button className="sidebar-btn" onClick={() => logout().then(() => navigate('/'))} title={t('auth.logout')}>
+              <span className="w-[22px] shrink-0 text-center">🚪</span>
+              <Label collapsed={collapsed}>{t('auth.logout')} ({user.userName})</Label>
+            </button>
+          ) : (
+            <Link to="/login" className="sidebar-btn" title={t('auth.login')}>
+              <span className="w-[22px] shrink-0 text-center">🔑</span>
+              <Label collapsed={collapsed}>{t('auth.login')}</Label>
+            </Link>
+          )}
+          <button className="sidebar-btn" onClick={() => setTheme(nextTheme)} title={`${t('theme.label')}: ${t(`theme.${theme}`)}`}>
+            <span className="w-[22px] shrink-0 text-center">{theme === 'dark' ? '🌙' : theme === 'light' ? '☀️' : '◐'}</span>
+            <Label collapsed={collapsed}>{t('theme.label')}: {t(`theme.${theme}`)}</Label>
+          </button>
+        </div>
+      </aside>
+
+      {!collapsed && <div className="fixed inset-0 z-20 bg-black/40 md:hidden" onClick={() => setCollapsed(true)} />}
+
+      <main id="main" className="min-w-0 flex-1 overflow-y-auto bg-bg px-4 py-6 md:px-8">
+        <div className="mx-auto max-w-6xl">
           <Outlet />
-        </main>
-      </div>
+        </div>
+      </main>
       <UpdatePrompt />
     </div>
+  )
+}
+
+function Label({ collapsed, children }: { collapsed: boolean; children: ReactNode }) {
+  return <span className={clsx('min-w-0 flex-1 truncate transition-opacity', collapsed && 'w-0 opacity-0')}>{children}</span>
+}
+
+function Divider() {
+  return <div className="mx-0.5 my-1 h-px bg-line" />
+}
+
+function SectionTitle({ children }: { children: ReactNode }) {
+  return <div className="truncate px-2 pt-1.5 pb-0.5 text-[0.7rem] font-bold tracking-wider text-muted uppercase">{children}</div>
+}
+
+function SidebarEntry({ icon, title, subtitle, active, onClick }: { icon: string; title: string; subtitle?: string; active?: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      className={clsx(
+        'flex w-full items-start gap-1.5 overflow-hidden rounded-md px-2 py-1.5 text-left text-[0.82rem] leading-snug hover:bg-accent-faint',
+        active && 'bg-accent-faint text-accent',
+      )}
+    >
+      <span className="shrink-0 text-[0.85rem]">{icon}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate font-semibold">{title}</span>
+        {subtitle && <span className="mt-px block truncate text-[0.76rem] text-muted">{subtitle}</span>}
+      </span>
+    </button>
   )
 }

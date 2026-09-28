@@ -37,7 +37,7 @@ export default function Login() {
       <form onSubmit={submit} className="card w-full max-w-sm space-y-4 p-6">
         <div className="flex flex-col items-center gap-2 text-center">
           <Logo className="h-12 w-12" />
-          <h1 className="font-serif text-2xl font-semibold">{config.data?.title ?? '.NET OPDS'}</h1>
+          <h1 className="text-2xl font-semibold">{config.data?.title ?? '.NET OPDS'}</h1>
           <p className="text-sm muted">{t('auth.prompt')}</p>
         </div>
         <label className="block">
