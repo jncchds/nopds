@@ -21,7 +21,7 @@ services:
     volumes:
       - nopds-data:/data
       # Mount each library read-only; register it in Admin → Libraries using the container path.
-      - ./books:/books:ro
+      - ${NOPDS_BOOKS:-./books}:/books:ro
 
   postgres:
     image: postgres:17-alpine

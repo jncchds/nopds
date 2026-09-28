@@ -6,7 +6,7 @@ WORKDIR /spa
 COPY src/Nopds.Web/ClientApp/package.json src/Nopds.Web/ClientApp/package-lock.json ./
 RUN npm ci
 COPY src/Nopds.Web/ClientApp/ ./
-RUN npm run build
+RUN npm run build && test -f /wwwroot/index.html
 
 # ---- .NET build ----
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
@@ -22,7 +22,7 @@ COPY src/Nopds.Telegram/Nopds.Telegram.csproj src/Nopds.Telegram/
 COPY src/Nopds.Web/Nopds.Web.csproj src/Nopds.Web/
 RUN dotnet restore src/Nopds.Web/Nopds.Web.csproj
 COPY src/ src/
-COPY --from=spa /spa/dist/ src/Nopds.Web/wwwroot/
+COPY --from=spa /wwwroot/ src/Nopds.Web/wwwroot/
 RUN dotnet publish src/Nopds.Web/Nopds.Web.csproj -c Release -o /app -p:SkipSpaBuild=true --no-restore
 
 # ---- runtime ----
@@ -37,6 +37,8 @@ ENV ASPNETCORE_HTTP_PORTS=8080 \
     Nopds__DataDir=/data \
     Nopds__CacheDir=/data/cache \
     DOTNET_gcServer=0
+# A new named volume inherits this ownership, so the non-root app user can write to it.
+RUN mkdir -p /data/cache && chown -R $APP_UID /data
 VOLUME ["/data"]
 EXPOSE 8080
 USER $APP_UID
