@@ -1,5 +1,9 @@
 # Release Notes
 
+## v0.1.1 — 2026-09-28
+
+- fix: scanning an INPX index that lists the same book more than once (or a ZIP with a repeated entry name) no longer fails whole write batches with `duplicate key … ix_books_library_id_rel_path_entry_name`; repeats are skipped and counted in one log line
+
 ## v0.1.0 — 2026-09-28
 
 - feat: first public release — library scanning (FB2, EPUB, MOBI/AZW3, PDF, DJVU, CBZ, ZIP archives, INPX), OPDS catalog compatible with SimpleOPDS URLs, React web app with in-browser reader, FB2 → EPUB conversion, KOReader sync, optional Telegram bot

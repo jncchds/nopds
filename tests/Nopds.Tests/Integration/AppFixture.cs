@@ -70,11 +70,12 @@ public sealed class AppFixture : IAsyncLifetime
         File.Copy(TestFiles.PathOf("badfile.zip"), Path.Combine(Books, "zips", "badfile.zip"));
         File.Copy(TestFiles.PathOf("books.zip"), Path.Combine(Books, "inpx", "fb2-001.zip"));
 
-        // INPX with two live records (one duplicates a ZIP book) and one deleted record.
+        // INPX with two live records (one duplicates a ZIP book), a repeated record and one deleted record.
         const char sep = '\u0004';
         string Line(params string[] f) => string.Join(sep, f);
         var inp = string.Join("\r\n",
             Line("Логинов,Святослав,:", "prose_rus_classic:", "Любовь в жизни Обломова", "Рассказы", "1", "539603", "15194", "1", "0", "fb2", "2014-09-15", "ru"),
+            Line("Doe,John,:Smith,Ann,:", "sf:", "Test INPX Book", "", "", "539485", "12293", "2", "0", "fb2", "2015-01-01", "en"),
             Line("Doe,John,:Smith,Ann,:", "sf:", "Test INPX Book", "", "", "539485", "12293", "2", "0", "fb2", "2015-01-01", "en"),
             Line("Deleted,Guy,:", "sf:", "Deleted", "", "", "539273", "1", "3", "1", "fb2", "2015-01-01", "en")) + "\r\n";
         using var zip = ZipFile.Open(Path.Combine(Books, "inpx", "lib.inpx"), ZipArchiveMode.Create);

@@ -51,6 +51,8 @@ public sealed class LibraryScanner(
         public HashSet<long> Seen { get; } = [];
         public List<long> Restored { get; } = [];
         public List<CatalogItem> DeferredCatalogs { get; } = [];
+        public HashSet<(string RelPath, string? EntryName)> Written { get; } = [];
+        public int Duplicates { get; set; }
         public HashSet<string> Extensions { get; } = new(library.Extensions.Select(e => e.TrimStart('.').ToLowerInvariant()), StringComparer.OrdinalIgnoreCase);
         public HashSet<string> VisitedDirs { get; } = new(StringComparer.Ordinal);
         public Channel<ParseJob> Jobs { get; } = Channel.CreateBounded<ParseJob>(new BoundedChannelOptions(256) { SingleWriter = true });
@@ -567,6 +569,14 @@ public sealed class LibraryScanner(
             switch (item)
             {
                 case BookItem b:
+                    // INPX indexes often list one file several times (and a ZIP may repeat an entry name);
+                    // only the first record per (path, entry) is stored, the rest would violate the unique index.
+                    if (!run.Written.Add((b.Record.RelPath, b.Record.EntryName)))
+                    {
+                        run.Duplicates++;
+                        break;
+                    }
+
                     batch.Add(b.Record);
                     if (batch.Count >= BatchSize)
                     {
@@ -582,6 +592,10 @@ public sealed class LibraryScanner(
         }
 
         await FlushAsync(run, writer, batch, ct);
+        if (run.Duplicates > 0)
+        {
+            log.LogInformation("Ignored {Count} duplicate book records in library {Library}", run.Duplicates, run.Library.Name);
+        }
     }
 
     /// <summary>Writes a batch; if it fails, retries record by record so one bad book cannot fail the scan.</summary>
