@@ -12,16 +12,17 @@ public static class BrowseEndpoints
 {
     public sealed record BookDetails(BookSummary Book, IReadOnlyList<string> ConvertTargets, bool OnShelf, string? KoreaderHash);
 
-    public sealed record SiteConfig(string Title, string Subtitle, string Version, AccessMode Access, bool AlphabetMenu, int SplitItems, int PageSize, bool ShowCovers, string[] Languages, string? Sso);
+    public sealed record SiteConfig(string Title, string Subtitle, string Version, AccessMode Access, bool AlphabetMenu, int SplitItems, int PageSize, bool ShowCovers, string[] Languages, string? Sso,
+        IReadOnlyList<string> ReaderConversions);
 
     public static void MapBrowseEndpoints(this IEndpointRouteBuilder api)
     {
-        api.MapGet("/config", (SettingsStore settings, Microsoft.Extensions.Options.IOptions<NopdsOptions> options) =>
+        api.MapGet("/config", (SettingsStore settings, ConversionService conversion, Microsoft.Extensions.Options.IOptions<NopdsOptions> options) =>
         {
             var s = settings.Current;
             var version = typeof(BrowseEndpoints).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
             return new SiteConfig(s.Title, s.Subtitle, version, s.Access, s.AlphabetMenu, s.SplitItems, s.MaxItems, s.ShowCovers, Domain.Text.UiLanguages.Supported,
-                options.Value.Oidc.Enabled ? options.Value.Oidc.DisplayName : null);
+                options.Value.Oidc.Enabled ? options.Value.Oidc.DisplayName : null, conversion.SourcesFor("epub"));
         }).AllowAnonymous();
 
         var g = api.MapGroup("").RequireAuthorization(Policies.Reader);
@@ -67,11 +68,12 @@ public static class BrowseEndpoints
         });
 
         // Raw book for the in-browser reader (foliate-js reads EPUB, FB2, MOBI/AZW3 and CBZ natively).
-        g.MapGet("/books/{id:long}/content", async (long id, HttpContext http, ScopeFactory scopes, CatalogService catalog, BookFiles files,
+        // The web reader opens formats it cannot render natively (DOCX, RTF, TXT, ...) as converted EPUB.
+        g.MapGet("/books/{id:long}/content", async (long id, string? format, HttpContext http, ScopeFactory scopes, CatalogService catalog, BookFiles files,
             CurrentUser user, CancellationToken ct) =>
         {
             var book = await catalog.BookEntityAsync(scopes.Create(), id, ct);
-            return book is null ? Results.NotFound() : await files.ServeAsync(http, book, null, zip: false, inline: true, user.Id, ct);
+            return book is null ? Results.NotFound() : await files.ServeAsync(http, book, format, zip: false, inline: true, user.Id, ct);
         });
 
         g.MapGet("/books/{id:long}/cover", (long id, HttpContext http, Covers covers, CancellationToken ct) => covers.ServeAsync(http, id, false, ct));

@@ -22,7 +22,7 @@ public sealed class BookParsers
         }
     }
 
-    public static BookParsers CreateDefault() => new([new Fb2Parser(), new EpubParser(), new MobiParser(), new ComicParser()]);
+    public static BookParsers CreateDefault() => new([new Fb2Parser(), new EpubParser(), new MobiParser(), new ComicParser(), new DocxParser(), new OdtParser(), new RtfParser(), new HtmlBookParser()]);
 
     public IBookParser For(string format) => _byFormat.TryGetValue(format, out var p) ? p : _generic;
 

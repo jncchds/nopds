@@ -243,6 +243,8 @@ public sealed class CatalogService(NopdsDbContext db, GenreCatalog genreCatalog,
     /// <summary>Loads the entity with its library for file access, honoring the scope.</summary>
     public Task<Book?> BookEntityAsync(Scope scope, long id, CancellationToken ct = default) =>
         Visible(scope).Include(b => b.Library).Include(b => b.Authors.OrderBy(a => a.Position)).ThenInclude(a => a.Author)
+            .Include(b => b.Series).ThenInclude(s => s.Series).Include(b => b.Genres).ThenInclude(g => g.Genre)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(b => b.Id == id, ct);
 
     public async Task<BookSummary?> RandomBookAsync(Scope scope, CancellationToken ct = default)

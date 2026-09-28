@@ -23,8 +23,9 @@ Built with **ASP.NET Core (.NET 10)**, **PostgreSQL** and a **React + TypeScript
 - Covers extracted on demand and cached as WebP thumbnails
 
 **Reading & downloads**
-- In-browser reader (foliate-js) for EPUB, FB2, MOBI/AZW3 and CBZ with saved reading position
-- Built-in **FB2 → EPUB 3** converter (no Java or Python tools), plus configurable external converters (e.g. `ebook-convert`, `kepubify`) with an LRU cache
+- In-browser reader (foliate-js) for EPUB, FB2, MOBI/AZW3 and CBZ, plus DOCX, ODT, RTF, TXT and HTML through on-the-fly EPUB conversion, with saved reading position
+- Built-in **EPUB 3** converters for FB2, DOCX, ODT, RTF, TXT and HTML (no Java or Python tools), plus configurable external converters (e.g. `ebook-convert`, `kepubify`) that chain with them (DOCX → EPUB → AZW3), with an LRU cache
+- Metadata (title, authors, language) read from DOCX, ODT, RTF and HTML files
 - Downloads as original, zipped or converted, with real UTF-8 file names
 
 **Clients**
@@ -140,7 +141,7 @@ src/Nopds.Domain          Entities and text helpers (language codes, translitera
 src/Nopds.Infrastructure  EF Core/PostgreSQL, migrations, Identity user, settings, genre catalog, catalog queries
 src/Nopds.Formats         FB2/EPUB/MOBI/CBZ parsers, book storage, covers, hashing
 src/Nopds.Scanner         Incremental scanner, INPX reader, scheduler, folder watcher
-src/Nopds.Conversion      FB2 → EPUB 3 converter, external converters, cache
+src/Nopds.Conversion      EPUB 3 converters (FB2, DOCX, ODT, RTF, TXT, HTML), external converters, routing, cache
 src/Nopds.Opds            OPDS 1.2 Atom and OPDS 2.0 JSON writers
 src/Nopds.Telegram        Telegram bot
 src/Nopds.Web             ASP.NET Core host: API, auth, OPDS/kosync endpoints, SignalR; ClientApp/ = React SPA

@@ -9,7 +9,7 @@ public class Library
     public bool Enabled { get; set; } = true;
 
     /// <summary>Extensions (without dot) that are indexed.</summary>
-    public string[] Extensions { get; set; } = ["fb2", "epub", "mobi", "azw3", "pdf", "djvu", "txt", "rtf", "doc", "docx", "cbz"];
+    public string[] Extensions { get; set; } = ["fb2", "epub", "mobi", "azw3", "pdf", "djvu", "txt", "rtf", "doc", "docx", "odt", "cbz"];
 
     public bool ScanZip { get; set; } = true;
 

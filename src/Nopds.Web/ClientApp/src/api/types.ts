@@ -62,6 +62,8 @@ export interface SiteConfig {
   languages: string[]
   /** Single sign-on provider name when SSO is configured. */
   sso?: string
+  /** Formats the web reader opens as server-converted EPUB. */
+  readerConversions: string[]
 }
 
 export interface User {
@@ -139,7 +141,7 @@ export interface AppSettings {
   showCovers: boolean
   hideDuplicates: boolean
   preferredFormats: string[]
-  conversion: { builtInFb2ToEpub: boolean; external: ExternalConverter[]; cacheSizeMb: number; timeoutSeconds: number }
+  conversion: { builtIn: boolean; external: ExternalConverter[]; cacheSizeMb: number; timeoutSeconds: number }
   telegram: { enabled: boolean; botToken?: string; requireLinkedUser: boolean; maxItems: number }
   sso: { requireApproval: boolean }
 }

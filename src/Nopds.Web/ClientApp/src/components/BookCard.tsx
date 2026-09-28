@@ -4,7 +4,8 @@ import clsx from 'clsx'
 import type { BookSummary } from '../api/types'
 import { useMediaBase } from '../auth/AuthContext'
 import { useViewMode } from '../hooks/useViewMode'
-import { displayName, formatSize, isReadable } from '../lib/format'
+import { useReadable } from '../hooks/useReadable'
+import { displayName, formatSize } from '../lib/format'
 import { Cover } from './Cover'
 
 /** Cover tile for the grid view. */
@@ -39,6 +40,7 @@ export function BookTile({ book, progress }: { book: BookSummary; progress?: num
 export function BookRow({ book, progress }: { book: BookSummary; progress?: number }) {
   const { t } = useTranslation()
   const media = useMediaBase()
+  const readable = useReadable()
   return (
     <div className="card flex items-start gap-4 px-4 py-4 transition-colors hover:border-accent sm:px-6">
       <Link to={`/book/${book.id}`} className="w-14 shrink-0 sm:w-16" tabIndex={-1} aria-hidden>
@@ -71,7 +73,7 @@ export function BookRow({ book, progress }: { book: BookSummary; progress?: numb
           {formatSize(book.fileSize)}
           {book.editions > 1 && ` · ${t('book.editions', { count: book.editions })}`}
         </span>
-        {isReadable(book.format) && <Link to={`/read/${book.id}`} className="btn-primary">{t('book.read')} →</Link>}
+        {readable(book.format) && <Link to={`/read/${book.id}`} className="btn-primary">{t('book.read')} →</Link>}
         <a href={`${media}/download/${book.id}/0`} className="btn-secondary" download>⬇ {book.format.toUpperCase()}</a>
       </div>
     </div>

@@ -55,7 +55,7 @@ function SettingsForm({ initial, onSaved, t }: { initial: AppSettings; onSaved: 
 
       <section className="card space-y-4 p-5">
         <h2 className="font-semibold">{t('admin.conversion')}</h2>
-        <Toggle checked={s.conversion.builtInFb2ToEpub} onChange={(v) => set('conversion', { ...s.conversion, builtInFb2ToEpub: v })} label={t('admin.builtIn')} />
+        <Toggle checked={s.conversion.builtIn} onChange={(v) => set('conversion', { ...s.conversion, builtIn: v })} label={t('admin.builtIn')} />
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block"><span className="label">{t('admin.cacheSize')}</span><input type="number" className="input" value={s.conversion.cacheSizeMb} onChange={(e) => set('conversion', { ...s.conversion, cacheSizeMb: Number(e.target.value) })} /></label>
           <label className="block"><span className="label">{t('admin.timeout')}</span><input type="number" className="input" value={s.conversion.timeoutSeconds} onChange={(e) => set('conversion', { ...s.conversion, timeoutSeconds: Number(e.target.value) })} /></label>

@@ -2,6 +2,10 @@
 
 ## v0.1.2 — 2026-09-28
 
+- feat: built-in EPUB converters for DOCX, ODT, RTF, TXT (encoding and chapter detection) and HTML alongside FB2 — headings become chapters, formatting, lists, tables, links, images and footnotes are kept; catalog metadata fills in what the file lacks
+- feat: conversions chain along the shortest route through built-in and external steps (e.g. DOCX → EPUB → AZW3 with a single `epub → azw3` tool); the "Built-in converters" setting replaces the FB2-only toggle (`builtIn`, on by default)
+- feat: the web reader opens DOCX, ODT, RTF, TXT and HTML books through their EPUB conversion
+- feat: the scanner reads title, authors, language and year from DOCX, ODT, RTF and HTML files; ODT is indexed by default in new libraries
 - fix: an expired web session no longer pops the browser's native Basic-auth dialog; the web API stops advertising `WWW-Authenticate: Basic` (only `/opds` feeds do), so the app refreshes its token silently
 
 ## v0.1.1 — 2026-09-28

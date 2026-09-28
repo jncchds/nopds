@@ -9,7 +9,8 @@ import { useAuth, useMediaBase } from '../auth/AuthContext'
 import { Cover } from '../components/Cover'
 import { BookGrid } from '../components/BookCard'
 import { ErrorBox, Loading } from '../components/ui'
-import { displayName, formatDate, formatSize, isReadable } from '../lib/format'
+import { useReadable } from '../hooks/useReadable'
+import { displayName, formatDate, formatSize } from '../lib/format'
 
 const NO_ZIP = ['epub', 'kepub', 'mobi', 'azw', 'azw3', 'cbz', 'docx']
 
@@ -19,6 +20,7 @@ export default function BookPage() {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const media = useMediaBase()
+  const readable = useReadable()
   const q = useBook(bookId)
   const [showEditions, setShowEditions] = useState(false)
   const editions = useEditions(bookId, showEditions)
@@ -71,7 +73,7 @@ export default function BookPage() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {isReadable(book.format) && (
+            {readable(book.format) && (
               <Link to={`/read/${book.id}`} className="btn-primary">
                 <BookOpenText className="h-4 w-4" /> {t('book.read')}
               </Link>

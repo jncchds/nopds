@@ -22,6 +22,15 @@ export function displayName(lastFirst: string) {
   return parts.length > 1 ? `${parts.slice(1).join(' ')} ${parts[0]}` : lastFirst
 }
 
-export function isReadable(format: string) {
-  return ['epub', 'kepub', 'fb2', 'mobi', 'azw', 'azw3', 'cbz'].includes(format.toLowerCase())
+/** Formats the reader (foliate-js) opens directly. */
+const NATIVE_READER_FORMATS = ['epub', 'kepub', 'fb2', 'mobi', 'azw', 'azw3', 'cbz']
+
+/**
+ * How the reader opens a book: the file itself, the server's EPUB conversion of it (DOCX, RTF, TXT, ...;
+ * `conversions` comes from the site config), or not at all.
+ */
+export function readerSource(format: string, conversions: readonly string[]): 'native' | 'epub' | undefined {
+  const f = format.toLowerCase()
+  if (NATIVE_READER_FORMATS.includes(f)) return 'native'
+  return conversions.includes(f) ? 'epub' : undefined
 }

@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using Nopds.Conversion.Converters;
 using Nopds.Domain.Entities;
 using Nopds.Formats;
 using Nopds.Infrastructure.Settings;
@@ -10,19 +11,38 @@ namespace Nopds.Conversion;
 public sealed record ConvertedFile(string Path, string Format, string MediaType);
 
 /// <summary>
-/// Converts books to other formats on demand. FB2→EPUB uses the built-in converter; other pairs use
-/// configured external tools. Results are cached on disk and evicted least-recently-used.
+/// Converts books to other formats on demand. Built-in converters turn FB2, DOCX, ODT, RTF, TXT and HTML
+/// into EPUB; configured external tools add more pairs. Conversions chain (e.g. DOCX → EPUB → AZW3)
+/// along the shortest route. Results are cached on disk and evicted least-recently-used.
 /// </summary>
 public sealed class ConversionService
 {
+    /// <summary>Longest chain of conversion steps considered.</summary>
+    private const int MaxSteps = 3;
+
+    public static readonly IReadOnlyList<IBookConverter> BuiltIns =
+    [
+        new Fb2ToEpubConverter(),
+        new DocxToEpubConverter(),
+        new OdtToEpubConverter(),
+        new RtfToEpubConverter(),
+        new TxtToEpubConverter(),
+        new HtmlToEpubConverter(),
+    ];
+
     private readonly string _dir;
-    private readonly SettingsStore _settings;
+    private readonly Func<ConversionSettings> _settings;
     private readonly ILogger<ConversionService> _log;
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
     private readonly SemaphoreSlim _parallel = new(Math.Max(1, Environment.ProcessorCount / 2));
     private int _evicting;
 
     public ConversionService(string cacheDir, SettingsStore settings, ILogger<ConversionService> log)
+        : this(cacheDir, () => settings.Current.Conversion, log)
+    {
+    }
+
+    public ConversionService(string cacheDir, Func<ConversionSettings> settings, ILogger<ConversionService> log)
     {
         _dir = Path.Combine(cacheDir, "convert");
         Directory.CreateDirectory(_dir);
@@ -30,45 +50,72 @@ public sealed class ConversionService
         _log = log;
     }
 
-    /// <summary>Target formats available for a source format (excluding the source itself).</summary>
-    public IReadOnlyList<string> TargetsFor(string format)
-    {
-        var conv = _settings.Current.Conversion;
-        var targets = new List<string>();
-        if (format.Equals("fb2", StringComparison.OrdinalIgnoreCase) && conv.BuiltInFb2ToEpub)
-        {
-            targets.Add("epub");
-        }
+    private sealed record Step(string From, string To, IBookConverter? BuiltIn, ExternalConverter? External);
 
-        foreach (var ext in conv.External.Where(e => e.Source.Equals(format, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(e.Command)))
+    /// <summary>Available single steps; built-ins first so they win over external tools at equal length.</summary>
+    private List<Step> Steps()
+    {
+        var conv = _settings();
+        var steps = new List<Step>();
+        if (conv.BuiltIn)
         {
-            var t = ext.Target.ToLowerInvariant();
-            if (!targets.Contains(t) && t != format)
+            foreach (var c in BuiltIns)
             {
-                targets.Add(t);
+                steps.AddRange(c.Sources.Select(s => new Step(s, c.Target, c, null)));
             }
         }
 
-        // Two-step chains through EPUB (e.g. fb2 → epub → kepub/azw3).
-        if (targets.Contains("epub"))
+        foreach (var ext in conv.External.Where(e => !string.IsNullOrWhiteSpace(e.Command) && !string.IsNullOrWhiteSpace(e.Source) && !string.IsNullOrWhiteSpace(e.Target)))
         {
-            foreach (var ext in conv.External.Where(e => e.Source.Equals("epub", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(e.Command)))
+            steps.Add(new Step(ext.Source.Trim().ToLowerInvariant(), ext.Target.Trim().ToLowerInvariant(), null, ext));
+        }
+
+        return steps;
+    }
+
+    /// <summary>Breadth-first search from <paramref name="source"/>: the shortest route to every reachable format.</summary>
+    private Dictionary<string, List<Step>> Routes(string source)
+    {
+        source = source.ToLowerInvariant();
+        var steps = Steps();
+        var routes = new Dictionary<string, List<Step>>(StringComparer.Ordinal) { [source] = [] };
+        var frontier = new List<string> { source };
+        for (var depth = 0; depth < MaxSteps && frontier.Count > 0; depth++)
+        {
+            var next = new List<string>();
+            foreach (var from in frontier)
             {
-                var t = ext.Target.ToLowerInvariant();
-                if (!targets.Contains(t) && t != format)
+                foreach (var step in steps.Where(s => s.From == from && !routes.ContainsKey(s.To)))
                 {
-                    targets.Add(t);
+                    routes[step.To] = [.. routes[from], step];
+                    next.Add(step.To);
                 }
             }
+
+            frontier = next;
         }
 
-        return targets;
+        routes.Remove(source);
+        return routes;
+    }
+
+    /// <summary>Target formats available for a source format (excluding the source itself), nearest first.</summary>
+    public IReadOnlyList<string> TargetsFor(string format) =>
+        Routes(format).OrderBy(r => r.Value.Count).Select(r => r.Key).ToList();
+
+    public bool CanConvert(string source, string target) => Routes(source).ContainsKey(target.ToLowerInvariant());
+
+    /// <summary>Source formats that can be turned into <paramref name="target"/>.</summary>
+    public IReadOnlyList<string> SourcesFor(string target)
+    {
+        target = target.ToLowerInvariant();
+        return Steps().Select(s => s.From).Distinct().Where(f => f != target && CanConvert(f, target)).Order().ToList();
     }
 
     public async Task<ConvertedFile?> ConvertAsync(Library library, Book book, string target, CancellationToken ct = default)
     {
         target = target.ToLowerInvariant();
-        if (!TargetsFor(book.Format).Contains(target))
+        if (!Routes(book.Format).TryGetValue(target, out var route))
         {
             return null;
         }
@@ -101,9 +148,8 @@ public sealed class ConversionService
 
                 using var ms = new MemoryStream();
                 await source.CopyToAsync(ms, ct);
-                var bytes = ms.ToArray();
                 var tmp = path + ".tmp";
-                var ok = await ConvertBytesAsync(bytes, book.Format.ToLowerInvariant(), target, tmp, ct);
+                var ok = await RunRouteAsync(ms.ToArray(), CatalogMetadata(book), route, tmp, ct);
                 if (!ok || !File.Exists(tmp))
                 {
                     return null;
@@ -126,34 +172,71 @@ public sealed class ConversionService
         return new ConvertedFile(path, target, MediaTypes.ForFormat(target));
     }
 
-    private async Task<bool> ConvertBytesAsync(byte[] bytes, string source, string target, string outPath, CancellationToken ct)
+    /// <summary>What the catalog knows about the book, for converters of formats without metadata of their own.</summary>
+    private static BookMetadata CatalogMetadata(Book book)
     {
-        var conv = _settings.Current.Conversion;
-        if (source == "fb2" && target == "epub" && conv.BuiltInFb2ToEpub)
-        {
-            await using var fs = File.Create(outPath);
-            new Fb2ToEpubConverter().Convert(bytes, fs);
-            return true;
-        }
+        var meta = new BookMetadata { Title = book.Title, Lang = book.Lang, Annotation = book.Annotation, DocDate = book.DocDate };
+        meta.Authors.AddRange(book.Authors.OrderBy(a => a.Position).Select(a => a.Author?.FullName).OfType<string>());
+        meta.Series.AddRange(book.Series.Where(s => s.Series is not null).Select(s => new SeriesRef(s.Series!.Name, s.SerNo)));
+        meta.Genres.AddRange(book.Genres.Where(g => g.Genre is not null).Select(g => g.Genre!.Code));
+        return meta;
+    }
 
-        var direct = conv.External.FirstOrDefault(e => e.Source.Equals(source, StringComparison.OrdinalIgnoreCase) && e.Target.Equals(target, StringComparison.OrdinalIgnoreCase));
-        if (direct is not null)
+    private async Task<bool> RunRouteAsync(byte[] bytes, BookMetadata meta, List<Step> route, string outPath, CancellationToken ct)
+    {
+        var timeout = _settings().TimeoutSeconds;
+        for (var i = 0; i < route.Count; i++)
         {
-            return await RunExternalAsync(direct, bytes, source, outPath, conv.TimeoutSeconds, ct);
-        }
-
-        if (source == "fb2" && conv.BuiltInFb2ToEpub)
-        {
-            var viaEpub = conv.External.FirstOrDefault(e => e.Source.Equals("epub", StringComparison.OrdinalIgnoreCase) && e.Target.Equals(target, StringComparison.OrdinalIgnoreCase));
-            if (viaEpub is not null)
+            var step = route[i];
+            var last = i == route.Count - 1;
+            var stepOut = last ? outPath : outPath + $".step{i}";
+            try
             {
-                using var epub = new MemoryStream();
-                new Fb2ToEpubConverter().Convert(bytes, epub);
-                return await RunExternalAsync(viaEpub, epub.ToArray(), "epub", outPath, conv.TimeoutSeconds, ct);
+                if (step.BuiltIn is { } builtIn)
+                {
+                    await Task.Run(() =>
+                    {
+                        using var fs = File.Create(stepOut);
+                        builtIn.Convert(bytes, meta, fs);
+                    }, ct);
+                }
+                else if (!await RunExternalAsync(step.External!, bytes, step.From, stepOut, timeout, ct))
+                {
+                    return false;
+                }
+
+                if (!last)
+                {
+                    bytes = await File.ReadAllBytesAsync(stepOut, ct);
+                }
+            }
+            catch (Exception ex) when (ex is FormatException or InvalidDataException or System.Xml.XmlException or IOException)
+            {
+                _log.LogWarning(ex, "Conversion {From} → {To} failed", step.From, step.To);
+                TryDelete(stepOut);
+                return false;
+            }
+            finally
+            {
+                if (!last)
+                {
+                    TryDelete(stepOut);
+                }
             }
         }
 
-        return false;
+        return true;
+    }
+
+    private static void TryDelete(string path)
+    {
+        try
+        {
+            File.Delete(path);
+        }
+        catch (IOException)
+        {
+        }
     }
 
     /// <summary>
@@ -302,7 +385,7 @@ public sealed class ConversionService
 
         try
         {
-            var limit = (long)_settings.Current.Conversion.CacheSizeMb * 1024 * 1024;
+            var limit = (long)_settings().CacheSizeMb * 1024 * 1024;
             var files = new DirectoryInfo(_dir).EnumerateFiles().Where(f => !f.Name.EndsWith(".tmp", StringComparison.Ordinal)).ToList();
             var total = files.Sum(f => f.Length);
             foreach (var f in files.OrderBy(f => f.LastAccessTimeUtc))

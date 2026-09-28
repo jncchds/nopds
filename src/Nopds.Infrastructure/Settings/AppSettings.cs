@@ -48,9 +48,13 @@ public sealed record SsoSettings
 
 public sealed record ConversionSettings
 {
-    public bool BuiltInFb2ToEpub { get; init; } = true;
+    /// <summary>Built-in converters to EPUB for FB2, DOCX, ODT, RTF, TXT and HTML.</summary>
+    public bool BuiltIn { get; init; } = true;
 
-    /// <summary>External converters, e.g. {"Target":"mobi","Command":"ebook-convert {input} {output}"}.</summary>
+    /// <summary>
+    /// External converters, e.g. {"Source":"epub","Target":"azw3","Command":"ebook-convert {input} {output}"}.
+    /// Steps chain, so an EPUB → AZW3 tool also serves FB2, DOCX, etc.
+    /// </summary>
     public ExternalConverter[] External { get; init; } = [];
 
     public int CacheSizeMb { get; init; } = 1024;

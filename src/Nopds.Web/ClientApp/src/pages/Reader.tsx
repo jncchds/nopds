@@ -3,10 +3,11 @@ import { Link, useParams } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, ChevronLeft, ChevronRight, List, Minus, Plus } from 'lucide-react'
 import { api, apiBlob } from '../api/client'
-import { useBook } from '../api/hooks'
+import { useBook, useConfig } from '../api/hooks'
 import type { Progress } from '../api/types'
 import { useAuth } from '../auth/AuthContext'
 import { ErrorBox, Spinner } from '../components/ui'
+import { readerSource } from '../lib/format'
 
 interface TocItem { label: string; href: string; subitems?: TocItem[] }
 interface FoliateView extends HTMLElement {
@@ -21,13 +22,17 @@ interface FoliateView extends HTMLElement {
 
 const FONT_SIZES = [85, 100, 115, 130, 150]
 
-/** In-browser reader based on foliate-js (EPUB, FB2, MOBI/AZW3, CBZ). Position is saved per user. */
+/**
+ * In-browser reader based on foliate-js (EPUB, FB2, MOBI/AZW3, CBZ natively; DOCX, ODT, RTF, TXT, ...
+ * through the server's EPUB conversion). Position is saved per user.
+ */
 export default function Reader() {
   const { id } = useParams()
   const bookId = Number(id)
   const { t } = useTranslation()
   const { user } = useAuth()
   const book = useBook(bookId)
+  const config = useConfig()
   const host = useRef<HTMLDivElement>(null)
   const view = useRef<FoliateView | null>(null)
   const [error, setError] = useState<unknown>(null)
@@ -51,16 +56,18 @@ export default function Reader() {
   useEffect(() => {
     let cancelled = false
     const container = host.current
-    if (!container || !book.data) return
+    if (!container || !book.data || !config.data) return
+    const { fileName, format, title } = book.data.book
+    const converted = readerSource(format, config.data.readerConversions) === 'epub'
     ;(async () => {
       try {
         await import('foliate-js/view.js')
         const [blob, progress] = await Promise.all([
-          apiBlob(`/books/${bookId}/content`),
+          apiBlob(`/books/${bookId}/content${converted ? '?format=epub' : ''}`),
           user ? api<Progress | undefined>(`/progress/${bookId}`).catch(() => undefined) : Promise.resolve(undefined),
         ])
         if (cancelled) return
-        const file = new File([blob], book.data.book.fileName, { type: blob.type })
+        const file = new File([blob], converted ? `${title}.epub` : fileName, { type: blob.type })
         const v = document.createElement('foliate-view') as FoliateView
         v.style.cssText = 'display:block;width:100%;height:100%'
         container.replaceChildren(v)
@@ -92,7 +99,7 @@ export default function Reader() {
       window.clearTimeout(saveTimer.current)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bookId, book.data?.book.fileName])
+  }, [bookId, book.data?.book.fileName, config.data])
 
   useEffect(() => {
     applyStyles()
