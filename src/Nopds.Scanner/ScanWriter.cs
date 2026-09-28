@@ -124,7 +124,7 @@ internal sealed class ScanWriter(IDbContextFactory<NopdsDbContext> dbFactory, Ge
         await using var db = await dbFactory.CreateDbContextAsync(ct);
         await EnsureAuthorsAsync(db, batch.SelectMany(r => r.Meta.Authors), ct);
         await EnsureSeriesAsync(db, batch.SelectMany(r => r.Meta.Series.Select(s => s.Name)), ct);
-        await EnsureGenresAsync(db, batch.SelectMany(r => r.Meta.Genres), ct);
+        await EnsureGenresAsync(db, batch.Where(AcceptsUnknownGenres).SelectMany(r => r.Meta.Genres), ct);
 
         var updateIds = batch.Where(r => r.ExistingId is not null).Select(r => r.ExistingId!.Value).ToList();
         var existing = new Dictionary<long, Book>();
@@ -136,25 +136,28 @@ internal sealed class ScanWriter(IDbContextFactory<NopdsDbContext> dbFactory, Ge
             existing = await db.Books.Where(b => updateIds.Contains(b.Id)).ToDictionaryAsync(b => b.Id, ct);
         }
 
+        int added = 0, updated = 0;
         foreach (var r in batch)
         {
             Book book;
             if (r.ExistingId is { } id && existing.TryGetValue(id, out var found))
             {
                 book = found;
-                progress.BooksUpdated++;
+                updated++;
             }
             else
             {
                 book = new Book { RelPath = r.RelPath, FileName = r.FileName, Format = r.Format, Title = "", SearchTitle = "" };
                 db.Books.Add(book);
-                progress.BooksAdded++;
+                added++;
             }
 
             Fill(book, r, catalogIds[r.CatalogPath]);
         }
 
         await db.SaveChangesAsync(ct);
+        Interlocked.Add(ref progress.BooksAdded, added);
+        Interlocked.Add(ref progress.BooksUpdated, updated);
     }
 
     private void Fill(Book book, BookRecord r, long catalogId)
@@ -216,6 +219,12 @@ internal sealed class ScanWriter(IDbContextFactory<NopdsDbContext> dbFactory, Ge
             }
         }
     }
+
+    /// <summary>
+    /// FB2/INPX genres are codes and are kept even when unknown; EPUB/MOBI subjects are free text,
+    /// so they only count when they happen to match a known genre code.
+    /// </summary>
+    private static bool AcceptsUnknownGenres(BookRecord r) => r.Format == "fb2" || r.Container == BookContainer.Inpx;
 
     private static string NormalizeGenre(string g) => TextNormalizer.Truncate(g.Trim().ToLowerInvariant(), 64);
 

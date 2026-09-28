@@ -365,7 +365,7 @@ public sealed class LibraryScanner(
                 }
 
                 await run.Jobs.Writer.WriteAsync(new ParseJob(old?.Id, BookContainer.Zip, rel, entry.FullName, entry.Name, ext, entry.Length,
-                    entry.LastWriteTime, rel, CatalogType.Zip, data, null), ct);
+                    entry.LastWriteTime.ToUniversalTime(), rel, CatalogType.Zip, data, null), ct);
             }
 
             run.Progress.ArchivesScanned++;
@@ -570,20 +570,56 @@ public sealed class LibraryScanner(
                     batch.Add(b.Record);
                     if (batch.Count >= BatchSize)
                     {
-                        await writer.WriteAsync(batch, run.Progress, ct);
-                        batch.Clear();
+                        await FlushAsync(run, writer, batch, ct);
                     }
 
                     break;
                 case CatalogItem c:
-                    await writer.WriteAsync(batch, run.Progress, ct);
-                    batch.Clear();
+                    await FlushAsync(run, writer, batch, ct);
                     await writer.EnsureCatalogAsync(c.Path, c.Type, c.Size, c.Mtime, ct);
                     break;
             }
         }
 
-        await writer.WriteAsync(batch, run.Progress, ct);
+        await FlushAsync(run, writer, batch, ct);
+    }
+
+    /// <summary>Writes a batch; if it fails, retries record by record so one bad book cannot fail the scan.</summary>
+    private async Task FlushAsync(Run run, ScanWriter writer, List<BookRecord> batch, CancellationToken ct)
+    {
+        if (batch.Count == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            await writer.WriteAsync(batch, run.Progress, ct);
+        }
+        catch (DbUpdateException ex) when (batch.Count > 1)
+        {
+            log.LogWarning("Batch write failed ({Error}); retrying {Count} books individually", ex.InnerException?.Message ?? ex.Message, batch.Count);
+            foreach (var record in batch)
+            {
+                try
+                {
+                    await writer.WriteAsync([record], run.Progress, ct);
+                }
+                catch (DbUpdateException single)
+                {
+                    Interlocked.Increment(ref run.Progress.Errors);
+                    log.LogWarning("Cannot store {Path}{Entry}: {Error}", record.RelPath, record.EntryName is null ? "" : "!" + record.EntryName,
+                        single.InnerException?.Message ?? single.Message);
+                }
+            }
+        }
+        catch (DbUpdateException ex)
+        {
+            Interlocked.Increment(ref run.Progress.Errors);
+            log.LogWarning("Cannot store {Path}: {Error}", batch[0].RelPath, ex.InnerException?.Message ?? ex.Message);
+        }
+
+        batch.Clear();
     }
 
     private async Task FinishAsync(Run run, CancellationToken ct)

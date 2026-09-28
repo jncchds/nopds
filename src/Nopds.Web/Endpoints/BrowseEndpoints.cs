@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Nopds.Conversion;
 using Nopds.Domain.Entities;
-using Nopds.Formats.Covers;
 using Nopds.Infrastructure.Browse;
 using Nopds.Infrastructure.Settings;
 using Nopds.Web.Auth;
@@ -74,11 +73,9 @@ public static class BrowseEndpoints
             return book is null ? Results.NotFound() : await files.ServeAsync(http, book, null, zip: false, inline: true, user.Id, ct);
         });
 
-        g.MapGet("/books/{id:long}/cover", (long id, HttpContext http, ScopeFactory scopes, CatalogService catalog, CoverService covers, CancellationToken ct) =>
-            ServeCoverAsync(id, thumb: false, http, scopes, catalog, covers, ct));
+        g.MapGet("/books/{id:long}/cover", (long id, HttpContext http, Covers covers, CancellationToken ct) => covers.ServeAsync(http, id, false, ct));
 
-        g.MapGet("/books/{id:long}/thumb", (long id, HttpContext http, ScopeFactory scopes, CatalogService catalog, CoverService covers, CancellationToken ct) =>
-            ServeCoverAsync(id, thumb: true, http, scopes, catalog, covers, ct));
+        g.MapGet("/books/{id:long}/thumb", (long id, HttpContext http, Covers covers, CancellationToken ct) => covers.ServeAsync(http, id, true, ct));
 
         g.MapGet("/authors", (ScopeFactory scopes, CatalogService catalog, [AsParameters] NameListQuery q, CancellationToken ct) =>
             catalog.AuthorsAsync(scopes.Create(q.Library), q.ToQuery(), ct));
@@ -92,7 +89,7 @@ public static class BrowseEndpoints
         g.MapGet("/series/{id:long}", async (long id, CatalogService catalog, CancellationToken ct) =>
             await catalog.SeriesNameAsync(id, ct) is { } s ? Results.Ok(s) : Results.NotFound());
 
-        g.MapGet("/alphabet/{kind}", (string kind, ScopeFactory scopes, CatalogService catalog, int? library, LangCode? lang, string? prefix, CancellationToken ct) =>
+        g.MapGet("/alphabet/{kind}", (string kind, ScopeFactory scopes, CatalogService catalog, int? library, string? lang, string? prefix, CancellationToken ct) =>
         {
             var k = kind switch
             {
@@ -100,7 +97,7 @@ public static class BrowseEndpoints
                 "series" => CatalogService.AlphabetKind.Series,
                 _ => CatalogService.AlphabetKind.Books,
             };
-            return catalog.AlphabetAsync(scopes.Create(library), k, lang ?? LangCode.All, prefix, ct);
+            return catalog.AlphabetAsync(scopes.Create(library), k, EnumParam.Parse<LangCode>(lang) ?? LangCode.All, prefix, ct);
         });
 
         g.MapGet("/genres", (ScopeFactory scopes, CatalogService catalog, int? library, CancellationToken ct) =>
@@ -115,41 +112,20 @@ public static class BrowseEndpoints
                 ? Results.Ok(listing)
                 : Results.NotFound());
     }
-
-    private static async Task<IResult> ServeCoverAsync(long id, bool thumb, HttpContext http, ScopeFactory scopes, CatalogService catalog, CoverService covers, CancellationToken ct)
-    {
-        var book = await catalog.BookEntityAsync(scopes.Create(), id, ct);
-        if (book?.Library is null)
-        {
-            return Results.NotFound();
-        }
-
-        var file = thumb ? await covers.GetThumbnailAsync(book.Library, book, ct) : await covers.GetCoverAsync(book.Library, book, ct);
-        if (file is null)
-        {
-            http.Response.Headers.CacheControl = "private, max-age=3600";
-            return Results.NotFound();
-        }
-
-        // The URL is stable per book; a changed file gets a new cache key server side.
-        http.Response.Headers.CacheControl = "private, max-age=604800";
-        return Results.File(file.Path, file.MediaType, lastModified: File.GetLastWriteTimeUtc(file.Path),
-            entityTag: new Microsoft.Net.Http.Headers.EntityTagHeaderValue($"\"{Path.GetFileNameWithoutExtension(file.Path)}\""));
-    }
 }
 
 public sealed record BookListQuery(
     int? Library,
     string? Q,
-    TextMatch? Match,
-    LangCode? Lang,
+    string? Match,
+    string? Lang,
     long? Author,
     long? Series,
     int? Genre,
     string? Section,
     string? Language,
     string? Format,
-    BookSort? Sort,
+    string? Sort,
     bool? Dupes,
     bool? Shelf,
     int? Page,
@@ -160,15 +136,15 @@ public sealed record BookListQuery(
     public BookQuery ToQuery() => new()
     {
         Text = Q,
-        Match = Match ?? TextMatch.Contains,
-        Lang = Lang,
+        Match = EnumParam.Parse<TextMatch>(Match) ?? TextMatch.Contains,
+        Lang = EnumParam.Parse<LangCode>(Lang),
         AuthorId = Author,
         SeriesId = Series,
         GenreId = Genre,
         GenreSection = Section,
         BookLanguage = Language,
         Format = Format,
-        Sort = Sort ?? (Series is not null ? BookSort.SeriesNumber : BookSort.Title),
+        Sort = EnumParam.Parse<BookSort>(Sort) ?? (Series is not null ? BookSort.SeriesNumber : BookSort.Title),
         ShelfOf = Shelf == true ? User.Id ?? Guid.Empty : null,
         Page = Page ?? 1,
         PageSize = PageSize ?? 60,
@@ -176,16 +152,24 @@ public sealed record BookListQuery(
     };
 }
 
-public sealed record NameListQuery(int? Library, string? Q, TextMatch? Match, LangCode? Lang, long? Author, int? Page, int? PageSize, bool? Total)
+public sealed record NameListQuery(int? Library, string? Q, string? Match, string? Lang, long? Author, int? Page, int? PageSize, bool? Total)
 {
     public NameQuery ToQuery() => new()
     {
         Text = Q,
-        Match = Match ?? TextMatch.Begins,
-        Lang = Lang,
+        Match = EnumParam.Parse<TextMatch>(Match) ?? TextMatch.Begins,
+        Lang = EnumParam.Parse<LangCode>(Lang),
         AuthorId = Author,
         Page = Page ?? 1,
         PageSize = PageSize ?? 60,
         CountTotal = Total == true,
     };
+}
+
+/// <summary>Case-insensitive enum parsing for query strings (JSON uses camelCase names).</summary>
+public static class EnumParam
+{
+    public static T? Parse<T>(string? value)
+        where T : struct, Enum =>
+        !string.IsNullOrWhiteSpace(value) && Enum.TryParse<T>(value, ignoreCase: true, out var v) && Enum.IsDefined(v) ? v : null;
 }

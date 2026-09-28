@@ -1,4 +1,3 @@
-using Nopds.Formats.Covers;
 using Nopds.Infrastructure.Browse;
 using Nopds.Infrastructure.Settings;
 using Nopds.Opds;
@@ -22,7 +21,7 @@ public static class OpdsEndpoints
         CatalogService catalog,
         ScopeFactory scopes,
         BookFiles files,
-        CoverService covers,
+        Covers covers,
         SettingsStore settings,
         CurrentUser user,
         CancellationToken ct)
@@ -35,9 +34,9 @@ public static class OpdsEndpoints
             case "convert" when r.Long(1) is { } id && r.Seg(2).Length > 0:
                 return await ServeBookAsync(id, r.Seg(2), false);
             case "cover" when r.Long(1) is { } id:
-                return await ServeCoverAsync(id, thumb: false);
+                return await covers.ServeAsync(http, id, false, ct);
             case "thumb" when r.Long(1) is { } id:
-                return await ServeCoverAsync(id, thumb: true);
+                return await covers.ServeAsync(http, id, true, ct);
             case "search.xml":
                 var lang = scopes.Language;
                 var template = r.Origin + r.Prefix + "/search/{searchTerms}/";
@@ -60,24 +59,6 @@ public static class OpdsEndpoints
         {
             var book = await catalog.BookEntityAsync(scopes.Create(), id, ct);
             return book is null ? Results.NotFound() : await files.ServeAsync(http, book, format, zip, inline: false, user.Id, ct);
-        }
-
-        async Task<IResult> ServeCoverAsync(long id, bool thumb)
-        {
-            var book = await catalog.BookEntityAsync(scopes.Create(), id, ct);
-            if (book?.Library is null)
-            {
-                return Results.NotFound();
-            }
-
-            var file = thumb ? await covers.GetThumbnailAsync(book.Library, book, ct) : await covers.GetCoverAsync(book.Library, book, ct);
-            if (file is null)
-            {
-                return Results.NotFound();
-            }
-
-            http.Response.Headers.CacheControl = "private, max-age=604800";
-            return Results.File(file.Path, file.MediaType);
         }
     }
 }

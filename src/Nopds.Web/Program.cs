@@ -38,6 +38,13 @@ builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, relo
 
 builder.Services.Configure<NopdsOptions>(builder.Configuration.GetSection(NopdsOptions.Section));
 var nopds = builder.Configuration.GetSection(NopdsOptions.Section).Get<NopdsOptions>() ?? new NopdsOptions();
+nopds.DataDir = Path.GetFullPath(nopds.DataDir, builder.Environment.ContentRootPath);
+nopds.CacheDir = Path.GetFullPath(nopds.CacheDir, builder.Environment.ContentRootPath);
+builder.Services.PostConfigure<NopdsOptions>(o =>
+{
+    o.DataDir = nopds.DataDir;
+    o.CacheDir = nopds.CacheDir;
+});
 Directory.CreateDirectory(nopds.DataDir);
 Directory.CreateDirectory(nopds.CacheDir);
 
@@ -59,6 +66,7 @@ builder.Services.AddSingleton<SigningKeyProvider>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<ScopeFactory>();
 builder.Services.AddScoped<BookFiles>();
+builder.Services.AddScoped<Covers>();
 builder.Services.AddScoped<OpdsCatalog>();
 builder.Services.AddNopdsScanner();
 builder.Services.AddSingleton<IScanObserver, ScanHubObserver>();

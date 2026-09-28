@@ -375,12 +375,9 @@ public sealed class CatalogService(NopdsDbContext db, GenreCatalog genreCatalog,
 
         var groups = await names.Where(n => EF.Functions.Like(n, like) && n.Length >= len)
             .GroupBy(n => n.Substring(0, len))
-            .Select(g => new AlphabetGroup(g.Key, g.Count()))
-            .OrderBy(g => g.Prefix)
+            .Select(g => new { g.Key, Count = g.Count() })
             .ToListAsync(ct);
-
-        // Names exactly equal to the prefix belong to the prefix group itself.
-        return groups;
+        return groups.Select(g => new AlphabetGroup(g.Key, g.Count)).OrderBy(g => g.Prefix, StringComparer.Ordinal).ToList();
     }
 
     // ------------------------------------------------------------------ genres
