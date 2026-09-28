@@ -25,11 +25,22 @@ public sealed class OpdsAuthenticationHandler(
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     public const string SchemeName = "Opds";
-    public const string FeedTokenRouteKey = "feedToken";
+
+    /// <summary>Extracts {token} from /opds/t/{token}/...</summary>
+    public static string? FeedTokenOf(PathString path)
+    {
+        if (!path.StartsWithSegments("/opds/t", out var rest) || !rest.HasValue)
+        {
+            return null;
+        }
+
+        var token = rest.Value!.TrimStart('/').Split('/')[0];
+        return token.Length is > 0 and <= 64 ? token : null;
+    }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        if (Request.RouteValues.TryGetValue(FeedTokenRouteKey, out var tokenValue) && tokenValue is string token && token.Length > 0)
+        if (FeedTokenOf(Request.Path) is { } token)
         {
             var user = await cache.GetOrCreateAsync("feedtoken:" + token, async e =>
             {

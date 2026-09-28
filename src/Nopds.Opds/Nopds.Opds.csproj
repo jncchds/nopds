@@ -4,7 +4,4 @@
     <ProjectReference Include="..\Nopds.Infrastructure\Nopds.Infrastructure.csproj" />
   </ItemGroup>
 
-  <PropertyGroup>
-  </PropertyGroup>
-
 </Project>

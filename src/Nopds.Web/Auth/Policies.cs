@@ -13,11 +13,19 @@ public static class Policies
 
     public const string Admin = "admin";
 
+    /// <summary>Reader access for e-reader clients: Basic / feed-token auth with a Basic challenge.</summary>
+    public const string OpdsReader = "opds-reader";
+
+    /// <summary>Signed-in e-reader clients (KOReader sync, shelf).</summary>
+    public const string OpdsUser = "opds-user";
+
     public static void Configure(AuthorizationOptions o, params string[] schemes)
     {
         o.AddPolicy(Reader, p => p.AddAuthenticationSchemes(schemes).AddRequirements(new ReaderRequirement()));
         o.AddPolicy(User, p => p.AddAuthenticationSchemes(schemes).RequireAuthenticatedUser());
         o.AddPolicy(Admin, p => p.AddAuthenticationSchemes(schemes).RequireClaim(NopdsClaims.Admin, "true"));
+        o.AddPolicy(OpdsReader, p => p.AddAuthenticationSchemes(OpdsAuthenticationHandler.SchemeName).AddRequirements(new ReaderRequirement()));
+        o.AddPolicy(OpdsUser, p => p.AddAuthenticationSchemes(OpdsAuthenticationHandler.SchemeName).RequireAuthenticatedUser());
     }
 }
 

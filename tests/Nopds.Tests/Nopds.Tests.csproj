@@ -18,7 +18,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="TestData\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Nopds.Web\Nopds.Web.csproj" />
+    <ProjectReference Include="..\..\src\Nopds.Conversion\Nopds.Conversion.csproj" />
   </ItemGroup>
 
 </Project>

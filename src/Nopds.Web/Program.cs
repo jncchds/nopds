@@ -4,11 +4,17 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
+using Nopds.Conversion;
+using Nopds.Formats;
+using Nopds.Formats.Covers;
 using Nopds.Infrastructure;
 using Nopds.Infrastructure.Data;
+using Nopds.Infrastructure.Settings;
+using Nopds.Scanner;
 using Nopds.Web.Auth;
 using Nopds.Web.Endpoints;
 using Nopds.Web.Infrastructure;
+using Nopds.Web.Opds;
 using Serilog;
 
 if (args.Contains("--healthcheck"))
@@ -51,6 +57,14 @@ builder.Services.AddMemoryCache();
 builder.Services.AddScoped<CurrentUser>();
 builder.Services.AddSingleton<SigningKeyProvider>();
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<ScopeFactory>();
+builder.Services.AddScoped<BookFiles>();
+builder.Services.AddScoped<OpdsCatalog>();
+builder.Services.AddNopdsScanner();
+builder.Services.AddSingleton<IScanObserver, ScanHubObserver>();
+builder.Services.AddSingleton(sp => new CoverService(nopds.CacheDir, sp.GetRequiredService<BookParsers>()));
+builder.Services.AddSingleton(sp => new ConversionService(nopds.CacheDir, sp.GetRequiredService<SettingsStore>(), sp.GetRequiredService<ILogger<ConversionService>>()));
+builder.Services.AddSignalR().AddJsonProtocol(o => o.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter(System.Text.Json.JsonNamingPolicy.CamelCase)));
 
 builder.Services.ConfigureHttpJsonOptions(o =>
 {
@@ -138,6 +152,15 @@ app.MapHealthChecks("/health");
 
 var api = app.MapGroup("/api/v1");
 api.MapAuthEndpoints();
+api.MapBrowseEndpoints();
+api.MapReadingEndpoints();
+api.MapAdminEndpoints();
+app.MapHub<ScanHub>("/hubs/scan");
+app.MapOpds();
+app.MapKosync();
+
+// Unknown API/OPDS paths must not fall through to the SPA.
+app.Map("/api/{**rest}", () => Results.NotFound());
 
 app.MapFallbackToFile("index.html");
 
