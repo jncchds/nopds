@@ -100,7 +100,14 @@ public sealed class OpdsAuthenticationHandler(
     protected override Task HandleChallengeAsync(AuthenticationProperties properties)
     {
         Response.StatusCode = StatusCodes.Status401Unauthorized;
-        Response.Headers.WWWAuthenticate = "Basic realm=\".NET OPDS\", charset=\"UTF-8\"";
+
+        // Only e-reader feeds get a Basic challenge. The web API also accepts Basic, but advertising it
+        // there makes browsers pop a native login dialog on an expired JWT before the SPA can refresh it.
+        if (Request.Path.StartsWithSegments("/opds"))
+        {
+            Response.Headers.WWWAuthenticate = "Basic realm=\".NET OPDS\", charset=\"UTF-8\"";
+        }
+
         return Task.CompletedTask;
     }
 

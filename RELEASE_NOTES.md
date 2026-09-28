@@ -1,5 +1,9 @@
 # Release Notes
 
+## v0.1.2 — 2026-09-28
+
+- fix: an expired web session no longer pops the browser's native Basic-auth dialog; the web API stops advertising `WWW-Authenticate: Basic` (only `/opds` feeds do), so the app refreshes its token silently
+
 ## v0.1.1 — 2026-09-28
 
 - fix: scanning an INPX index that lists the same book more than once (or a ZIP with a repeated entry name) no longer fails whole write batches with `duplicate key … ix_books_library_id_rel_path_entry_name`; repeats are skipped and counted in one log line
