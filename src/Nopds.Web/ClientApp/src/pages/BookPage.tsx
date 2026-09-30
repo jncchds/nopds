@@ -2,24 +2,22 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { BookmarkMinus, BookmarkPlus, BookOpenText, Download, FileArchive, Lock, LockOpen, RefreshCw } from 'lucide-react'
+import { BookmarkMinus, BookmarkPlus, BookOpenText, Lock, LockOpen } from 'lucide-react'
 import { useBook, useEditions } from '../api/hooks'
 import { api } from '../api/client'
-import { useAuth, useMediaBase } from '../auth/AuthContext'
+import { useAuth } from '../auth/AuthContext'
 import { Cover } from '../components/Cover'
 import { BookGrid } from '../components/BookCard'
+import { DownloadButton } from '../components/DownloadButton'
 import { ErrorBox, Loading } from '../components/ui'
 import { useReadable } from '../hooks/useReadable'
 import { displayName, formatDate, formatSize } from '../lib/format'
-
-const NO_ZIP = ['epub', 'kepub', 'mobi', 'azw', 'azw3', 'cbz', 'docx']
 
 export default function BookPage() {
   const { id } = useParams()
   const bookId = Number(id)
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
-  const media = useMediaBase()
   const readable = useReadable()
   const q = useBook(bookId)
   const [showEditions, setShowEditions] = useState(false)
@@ -89,19 +87,7 @@ export default function BookPage() {
                 <BookOpenText className="h-4 w-4" /> {t('book.read')}
               </Link>
             )}
-            <a href={`${media}/download/${book.id}/0`} className="btn-secondary" download>
-              <Download className="h-4 w-4" /> {book.format.toUpperCase()}
-            </a>
-            {!NO_ZIP.includes(book.format) && (
-              <a href={`${media}/download/${book.id}/1`} className="btn-secondary" download>
-                <FileArchive className="h-4 w-4" /> {book.format.toUpperCase()}.ZIP
-              </a>
-            )}
-            {convertTargets.map((f) => (
-              <a key={f} href={`${media}/convert/${book.id}/${f}`} className="btn-secondary" download title={t('book.convert', { format: f.toUpperCase() })}>
-                <RefreshCw className="h-4 w-4" /> {f.toUpperCase()}
-              </a>
-            ))}
+            <DownloadButton book={book} targets={convertTargets} />
             {user && (
               <button className="btn-ghost" onClick={() => shelf.mutate(!onShelf)} disabled={shelf.isPending}>
                 {onShelf ? <BookmarkMinus className="h-4 w-4" /> : <BookmarkPlus className="h-4 w-4" />}

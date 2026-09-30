@@ -109,6 +109,12 @@
     "unknownAuthor": "Nieznany autor",
     "uploadedBy": "Przesłane przez"
   },
+  "download": {
+    "converted": "przekonwertowany",
+    "more": "Inne formaty",
+    "original": "oryginał",
+    "zipped": "w ZIP"
+  },
   "author": {
     "allBooks": "Wszystkie książki",
     "bySeries": "Serie"
@@ -135,6 +141,8 @@
     "changePassword": "Zmień hasło",
     "confirmPassword": "Powtórz nowe hasło",
     "currentPassword": "Obecne hasło",
+    "downloadFormat": "Format pobierania",
+    "downloadFormatHint": "Przycisk pobierania używa tego formatu, jeśli książkę można do niego przekonwertować, a w przeciwnym razie jej własnego formatu. Strzałka obok pokazuje wszystkie formaty.",
     "hideDuplicates": "Ukrywaj duplikaty",
     "hideDuplicatesHint": "Pokazuj jedno wydanie książki (najpierw preferowany format); pozostałe wydania są dostępne na stronie książki.",
     "kosync": "Synchronizacja postępu KOReader",
@@ -144,11 +152,13 @@
     "kosyncPassword": "Hasło synchronizacji",
     "language": "Język interfejsu",
     "newPassword": "Nowe hasło",
+    "noPasswordHint": "Logujesz się przez SSO. Ustaw hasło, aby używać uwierzytelniania HTTP Basic w czytnikach.",
     "opds": "Dostęp z czytników (OPDS)",
     "opds2": "Katalog OPDS 2.0 (JSON)",
     "opdsBasic": "Katalog z loginem i hasłem",
     "opdsHint": "Dodaj jeden z tych adresów katalogu do aplikacji czytnika. Link osobisty działa bez hasła — nie udostępniaj go.",
     "opdsToken": "Osobisty link do katalogu",
+    "originalFormat": "Własny format książki",
     "password": "Hasło",
     "passwordChanged": "Hasło zmienione. Inne urządzenia zostały wylogowane.",
     "passwordMismatch": "Nowe hasła nie są zgodne.",
@@ -157,12 +167,11 @@
     "regenerate": "Wygeneruj nowy link",
     "regenerateConfirm": "Stary link przestanie działać na wszystkich urządzeniach. Kontynuować?",
     "saved": "Zapisano.",
+    "setPassword": "Ustaw hasło",
     "systemLanguage": "Język systemu",
     "telegram": "Telegram",
     "telegramHint": "Powiąż konto Telegram, aby korzystać z bota biblioteki.",
-    "telegramUser": "Nazwa użytkownika Telegram",
-    "setPassword": "Ustaw hasło",
-    "noPasswordHint": "Logujesz się przez SSO. Ustaw hasło, aby używać uwierzytelniania HTTP Basic w czytnikach."
+    "telegramUser": "Nazwa użytkownika Telegram"
   },
   "admin": {
     "access": "Dostęp",

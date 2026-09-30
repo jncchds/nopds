@@ -103,6 +103,10 @@ public sealed class ConversionService
     public IReadOnlyList<string> TargetsFor(string format) =>
         Routes(format).OrderBy(r => r.Value.Count).Select(r => r.Key).ToList();
 
+    /// <summary>Every convertible source format with its targets, nearest first.</summary>
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> TargetMap() =>
+        Steps().Select(s => s.From).Distinct().Order().ToDictionary(f => f, TargetsFor);
+
     public bool CanConvert(string source, string target) => Routes(source).ContainsKey(target.ToLowerInvariant());
 
     /// <summary>Source formats that can be turned into <paramref name="target"/>.</summary>

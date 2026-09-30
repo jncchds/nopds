@@ -105,6 +105,12 @@
     "unknownAuthor": "Unknown author",
     "uploadedBy": "Uploaded by"
   },
+  "download": {
+    "converted": "converted",
+    "more": "Other formats",
+    "original": "original",
+    "zipped": "zipped"
+  },
   "author": {
     "allBooks": "All books",
     "bySeries": "Series"
@@ -131,6 +137,8 @@
     "changePassword": "Change password",
     "confirmPassword": "Repeat new password",
     "currentPassword": "Current password",
+    "downloadFormat": "Download format",
+    "downloadFormatHint": "The download button uses this format when the book can be converted to it, and the book's own format otherwise. The arrow next to it lists every format.",
     "hideDuplicates": "Hide duplicate editions",
     "hideDuplicatesHint": "Show one edition per book (preferred format first); other editions stay available on the book page.",
     "kosync": "KOReader progress sync",
@@ -140,11 +148,13 @@
     "kosyncPassword": "Sync password",
     "language": "Interface language",
     "newPassword": "New password",
+    "noPasswordHint": "You sign in with single sign-on. Set a password to use HTTP Basic authentication in e-reader apps.",
     "opds": "E-reader access (OPDS)",
     "opds2": "OPDS 2.0 (JSON) catalog",
     "opdsBasic": "Catalog with user name and password",
     "opdsHint": "Add one of these catalog URLs to your reading app. The personal link works without a password — keep it private.",
     "opdsToken": "Personal catalog link",
+    "originalFormat": "Book's own format",
     "password": "Password",
     "passwordChanged": "Password changed. Other devices have been signed out.",
     "passwordMismatch": "The new passwords do not match.",
@@ -153,12 +163,11 @@
     "regenerate": "Generate new link",
     "regenerateConfirm": "The old link will stop working on all devices. Continue?",
     "saved": "Saved.",
+    "setPassword": "Set password",
     "systemLanguage": "System language",
     "telegram": "Telegram",
     "telegramHint": "Link your Telegram account to use the library bot.",
-    "telegramUser": "Telegram user name",
-    "setPassword": "Set password",
-    "noPasswordHint": "You sign in with single sign-on. Set a password to use HTTP Basic authentication in e-reader apps."
+    "telegramUser": "Telegram user name"
   },
   "admin": {
     "access": "Access",

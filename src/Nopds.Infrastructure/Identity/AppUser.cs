@@ -20,6 +20,9 @@ public class AppUser : IdentityUser<Guid>
     /// <summary>Preferred UI language (en/uk/pl/de); null means follow the browser.</summary>
     public string? UiLanguage { get; set; }
 
+    /// <summary>Format the web UI downloads by default (converting when possible); null means the book's own format.</summary>
+    public string? PreferredFormat { get; set; } = "fb2";
+
     /// <summary>Telegram username (without @) linked to this account for bot authentication.</summary>
     public string? TelegramUsername { get; set; }
 

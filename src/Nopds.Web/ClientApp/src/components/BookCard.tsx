@@ -3,11 +3,11 @@ import { useTranslation } from 'react-i18next'
 import clsx from 'clsx'
 import { Lock } from 'lucide-react'
 import type { BookSummary } from '../api/types'
-import { useMediaBase } from '../auth/AuthContext'
 import { useViewMode } from '../hooks/useViewMode'
 import { useReadable } from '../hooks/useReadable'
 import { displayName, formatSize } from '../lib/format'
 import { Cover } from './Cover'
+import { DownloadButton } from './DownloadButton'
 
 /** Cover tile for the grid view. */
 export function BookTile({ book, progress }: { book: BookSummary; progress?: number }) {
@@ -45,7 +45,6 @@ export function BookTile({ book, progress }: { book: BookSummary; progress?: num
 /** ABook-style list card: cover, title, pills, annotation, actions on the right. */
 export function BookRow({ book, progress }: { book: BookSummary; progress?: number }) {
   const { t } = useTranslation()
-  const media = useMediaBase()
   const readable = useReadable()
   return (
     <div className="card flex items-start gap-4 px-4 py-4 transition-colors hover:border-accent sm:px-6">
@@ -81,7 +80,7 @@ export function BookRow({ book, progress }: { book: BookSummary; progress?: numb
           {book.editions > 1 && ` · ${t('book.editions', { count: book.editions })}`}
         </span>
         {readable(book.format) && <Link to={`/read/${book.id}`} className="btn-primary">{t('book.read')} →</Link>}
-        <a href={`${media}/download/${book.id}/0`} className="btn-secondary" download>⬇ {book.format.toUpperCase()}</a>
+        <DownloadButton book={book} compact />
       </div>
     </div>
   )

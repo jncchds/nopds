@@ -84,6 +84,8 @@ export interface SiteConfig {
   sso?: string
   /** Formats the web reader opens as server-converted EPUB. */
   readerConversions: string[]
+  /** Source format → formats the server can convert it to, nearest first. */
+  conversions: Record<string, string[]>
   /** Present when users may upload books. */
   uploads?: { libraryId: number; extensions: string[]; maxMegabytes: number }
 }
@@ -98,6 +100,8 @@ export interface User {
   telegramUsername?: string
   kosyncConfigured: boolean
   hasPassword: boolean
+  /** Default download format; absent means the book's own format. */
+  preferredFormat?: string
 }
 
 export interface AuthResponse { accessToken: string; expiresAt: string; user: User }

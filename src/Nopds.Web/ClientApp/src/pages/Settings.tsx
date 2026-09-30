@@ -8,6 +8,7 @@ import type { User } from '../api/types'
 import { useAuth } from '../auth/AuthContext'
 import { LANGUAGES, detectLanguage, rememberLanguage } from '../i18n'
 import { PageTitle, Toggle } from '../components/ui'
+import { useDownloadFormats } from '../hooks/useDownloadFormats'
 
 function Section({ title, children, description }: { title: string; description?: ReactNode; children: ReactNode }) {
   return (
@@ -47,6 +48,7 @@ export default function Settings() {
   const [qr, setQr] = useState<string>()
   const [telegram, setTelegram] = useState(user?.telegramUsername ?? '')
   const [msg, setMsg] = useState<Record<string, string>>({})
+  const formats = useDownloadFormats()
 
   const opdsUrl = feedToken ? `${origin}/opds/t/${feedToken}/` : ''
   useEffect(() => {
@@ -55,7 +57,7 @@ export default function Settings() {
 
   if (!user) return null
 
-  const update = async (patch: Partial<Pick<User, 'uiLanguage' | 'hideDuplicates' | 'telegramUsername'>> & { uiLanguage?: string }) => {
+  const update = async (patch: Partial<Pick<User, 'uiLanguage' | 'hideDuplicates' | 'telegramUsername' | 'preferredFormat'>> & { uiLanguage?: string }) => {
     const u = await api<User>('/me', { method: 'PUT', json: patch })
     setUser(u)
     qc.invalidateQueries({ queryKey: ['books'] })
@@ -105,13 +107,25 @@ export default function Settings() {
       <PageTitle subtitle={user.userName}>{t('nav.settings')}</PageTitle>
 
       <Section title={t('settings.preferences')}>
-        <label className="block max-w-xs">
-          <span className="label">{t('settings.language')}</span>
-          <select className="input" value={user.uiLanguage ?? ''} onChange={(e) => setLanguage(e.target.value)}>
-            <option value="">{t('settings.systemLanguage')}</option>
-            {LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.name}</option>)}
-          </select>
-        </label>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="block">
+            <span className="label">{t('settings.language')}</span>
+            <select className="input" value={user.uiLanguage ?? ''} onChange={(e) => setLanguage(e.target.value)}>
+              <option value="">{t('settings.systemLanguage')}</option>
+              {LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.name}</option>)}
+            </select>
+          </label>
+          <label className="block">
+            <span className="label">{t('settings.downloadFormat')}</span>
+            <select className="input" value={user.preferredFormat ?? ''} onChange={(e) => update({ preferredFormat: e.target.value })}>
+              <option value="">{t('settings.originalFormat')}</option>
+              {[...new Set([...formats, ...(user.preferredFormat ? [user.preferredFormat] : [])])].sort().map((f) => (
+                <option key={f} value={f}>{f.toUpperCase()}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <p className="mt-1 text-xs muted">{t('settings.downloadFormatHint')}</p>
         <div className="mt-3">
           <Toggle checked={user.hideDuplicates} onChange={(v) => update({ hideDuplicates: v })} label={t('settings.hideDuplicates')} hint={t('settings.hideDuplicatesHint')} />
         </div>

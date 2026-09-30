@@ -16,11 +16,13 @@ public static class AuthEndpoints
 
     public sealed record LoginRequest(string UserName, string Password);
 
-    public sealed record UserDto(Guid Id, string UserName, bool IsAdmin, string? UiLanguage, bool HideDuplicates, int[]? AllowedLibraryIds, string? TelegramUsername, bool KosyncConfigured, bool HasPassword);
+    public sealed record UserDto(Guid Id, string UserName, bool IsAdmin, string? UiLanguage, bool HideDuplicates, int[]? AllowedLibraryIds, string? TelegramUsername, bool KosyncConfigured, bool HasPassword,
+        string? PreferredFormat);
 
     public sealed record AuthResponse(string AccessToken, DateTimeOffset ExpiresAt, UserDto User);
 
-    public sealed record ProfileUpdate(string? UiLanguage, bool? HideDuplicates, string? TelegramUsername);
+    /// <summary>Null fields stay unchanged; an empty PreferredFormat means "the book's own format".</summary>
+    public sealed record ProfileUpdate(string? UiLanguage, bool? HideDuplicates, string? TelegramUsername, string? PreferredFormat);
 
     /// <summary>CurrentPassword may be empty for single sign-on accounts that have no password yet.</summary>
     public sealed record PasswordChange(string? CurrentPassword, string NewPassword);
@@ -28,7 +30,8 @@ public static class AuthEndpoints
     public sealed record KosyncKey(string Password);
 
     public static UserDto ToDto(this AppUser u) =>
-        new(u.Id, u.UserName ?? "", u.IsAdmin, u.UiLanguage, u.HideDuplicates, u.AllowedLibraryIds, u.TelegramUsername, u.KosyncKeyHash is not null, u.PasswordHash is not null);
+        new(u.Id, u.UserName ?? "", u.IsAdmin, u.UiLanguage, u.HideDuplicates, u.AllowedLibraryIds, u.TelegramUsername, u.KosyncKeyHash is not null, u.PasswordHash is not null,
+            u.PreferredFormat);
 
     public static void MapAuthEndpoints(this IEndpointRouteBuilder api)
     {
@@ -111,6 +114,17 @@ public static class AuthEndpoints
             if (req.HideDuplicates is { } hide)
             {
                 u.HideDuplicates = hide;
+            }
+
+            if (req.PreferredFormat is not null)
+            {
+                var format = req.PreferredFormat.Trim().TrimStart('.').ToLowerInvariant();
+                if (format.Length > 16 || !format.All(char.IsAsciiLetterOrDigit))
+                {
+                    return Results.ValidationProblem(new Dictionary<string, string[]> { ["preferredFormat"] = ["Invalid format."] });
+                }
+
+                u.PreferredFormat = format.Length == 0 ? null : format;
             }
 
             if (req.TelegramUsername is not null)

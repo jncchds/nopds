@@ -105,6 +105,12 @@
     "unknownAuthor": "Unbekannter Autor",
     "uploadedBy": "Hochgeladen von"
   },
+  "download": {
+    "converted": "konvertiert",
+    "more": "Weitere Formate",
+    "original": "Original",
+    "zipped": "gezippt"
+  },
   "author": {
     "allBooks": "Alle Bücher",
     "bySeries": "Serien"
@@ -131,6 +137,8 @@
     "changePassword": "Passwort ändern",
     "confirmPassword": "Neues Passwort wiederholen",
     "currentPassword": "Aktuelles Passwort",
+    "downloadFormat": "Download-Format",
+    "downloadFormatHint": "Der Download-Knopf nutzt dieses Format, wenn das Buch dorthin konvertiert werden kann, sonst das eigene Format des Buchs. Der Pfeil daneben listet alle Formate.",
     "hideDuplicates": "Doppelte Ausgaben ausblenden",
     "hideDuplicatesHint": "Eine Ausgabe pro Buch zeigen (bevorzugtes Format zuerst); weitere Ausgaben bleiben auf der Buchseite verfügbar.",
     "kosync": "KOReader-Fortschrittssynchronisierung",
@@ -140,11 +148,13 @@
     "kosyncPassword": "Sync-Passwort",
     "language": "Sprache der Oberfläche",
     "newPassword": "Neues Passwort",
+    "noPasswordHint": "Du meldest dich per Single Sign-on an. Lege ein Passwort fest, um HTTP-Basic-Authentifizierung in E-Reader-Apps zu nutzen.",
     "opds": "Zugriff für E-Reader (OPDS)",
     "opds2": "OPDS-2.0-Katalog (JSON)",
     "opdsBasic": "Katalog mit Benutzername und Passwort",
     "opdsHint": "Füge eine dieser Katalog-Adressen in deiner Lese-App hinzu. Der persönliche Link funktioniert ohne Passwort — halte ihn geheim.",
     "opdsToken": "Persönlicher Katalog-Link",
+    "originalFormat": "Eigenes Format des Buchs",
     "password": "Passwort",
     "passwordChanged": "Passwort geändert. Andere Geräte wurden abgemeldet.",
     "passwordMismatch": "Die neuen Passwörter stimmen nicht überein.",
@@ -153,12 +163,11 @@
     "regenerate": "Neuen Link erzeugen",
     "regenerateConfirm": "Der alte Link funktioniert dann auf keinem Gerät mehr. Fortfahren?",
     "saved": "Gespeichert.",
+    "setPassword": "Passwort festlegen",
     "systemLanguage": "Systemsprache",
     "telegram": "Telegram",
     "telegramHint": "Verknüpfe dein Telegram-Konto, um den Bibliotheks-Bot zu nutzen.",
-    "telegramUser": "Telegram-Benutzername",
-    "setPassword": "Passwort festlegen",
-    "noPasswordHint": "Du meldest dich per Single Sign-on an. Lege ein Passwort fest, um HTTP-Basic-Authentifizierung in E-Reader-Apps zu nutzen."
+    "telegramUser": "Telegram-Benutzername"
   },
   "admin": {
     "access": "Zugriff",

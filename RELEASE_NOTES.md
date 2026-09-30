@@ -7,6 +7,8 @@
 - feat: books the scanner finds in the upload folder without an uploader (copied in by hand, or there before uploads were enabled) become public uploads of the first user, who can then manage their privacy
 - feat: when a scan finds an uploaded file missing, its book is hidden rather than removed, so owner and privacy survive a remount; the upload list marks it as missing
 - feat: docker-compose offers a bind mount for `/uploads` so uploaded books live outside the container; `Nopds__UploadMaxMegabytes` (default 200) caps one upload
+- feat: split download button on book pages and list cards — the main part downloads the preferred format (converting when possible, otherwise the book's own format); the arrow lists the original, its ZIP and every conversion target
+- feat: per-user **Download format** preference in Settings (default FB2, or the book's own format); `/api/config` exposes the conversion map
 
 ## v0.1.2 — 2026-09-28
 
