@@ -20,6 +20,7 @@ Built with **ASP.NET Core (.NET 10)**, **PostgreSQL** and a **React + TypeScript
 - Cron schedule per library, optional **folder watching** (partial rescans of changed folders), live progress in the admin UI
 - **Smart duplicates**: editions of the same work (normalized title + authors) collapse into one entry, with a preferred format order; optional content hashing for exact duplicates
 - Soft or hard delete of books whose files disappear, with automatic restore
+- Optional **upload library**: signed-in users upload books from the web app; uploads are public by default or private to the uploader (and admins) — also in OPDS and the Telegram bot
 - Covers extracted on demand and cached as WebP thumbnails
 
 **Reading & downloads**
@@ -96,10 +97,31 @@ Host settings come from `appsettings.json` or environment variables (`__` separa
 | `Nopds__Oidc__ClientId` / `Nopds__Oidc__ClientSecret` | –   | OAuth2 client credentials                          |
 | `Nopds__Oidc__DisplayName`      | `Authentik`               | Provider name on the login button                  |
 | `Nopds__Oidc__Scopes__0…`       | `openid profile email`    | Requested scopes                                   |
+| `Nopds__UploadPath`             | –                         | Folder of the upload library; uploading is off when empty (see below) |
+| `Nopds__UploadMaxMegabytes`     | `200`                     | Largest accepted upload (all files of one upload together) |
 
 Everything else (site title, public/private access, page sizes, duplicate handling, covers, converters, Telegram bot, SSO approval) is edited at runtime in **Administration → Settings**. Library options (extensions, ZIP code page, INPX, schedule, watching, soft delete, hashing) are per library.
 
 Behind a reverse proxy, forward `X-Forwarded-Proto` and `X-Forwarded-Host` so OPDS links use the public address.
+
+### Upload library
+
+Set `Nopds__UploadPath` to let users add books themselves. On start a library for that folder is created (named *Uploads*) and scanned, tracked and browsed like any other; every signed-in user can open it and upload to it from the **Upload** page, whatever their per-library access.
+
+- Uploads are **public** by default. The uploader can mark a book **private** when uploading or later (upload page or book page); private books are shown only to the uploader and admins — in the web app, OPDS feeds, downloads and the Telegram bot. Admins can change the privacy of any upload.
+- Files placed in the folder by other means (copied in by hand, or there before uploads were enabled) are treated as public uploads of the **first user** (the oldest account, normally the main admin) on the next scan.
+- When a scan finds an uploaded file missing, the book is **hidden**, not removed, so its owner and privacy come back with the file.
+- The folder must be writable. In Docker, bind it to a host folder so books survive container rebuilds — uncomment both lines in `docker-compose.yml`:
+
+  ```yaml
+  environment:
+    Nopds__UploadPath: "/uploads"
+  volumes:
+    - ${NOPDS_UPLOADS:-./uploads}:/uploads
+  ```
+
+  The container runs as UID 1654, so give it the host folder: `mkdir -p uploads && sudo chown 1654 uploads`.
+- Removing `Nopds__UploadPath` turns uploading off; the library stays as a regular one and private books stay private.
 
 ### Single sign-on with Authentik
 

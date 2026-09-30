@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { BookmarkMinus, BookmarkPlus, BookOpenText, Download, FileArchive, RefreshCw } from 'lucide-react'
+import { BookmarkMinus, BookmarkPlus, BookOpenText, Download, FileArchive, Lock, LockOpen, RefreshCw } from 'lucide-react'
 import { useBook, useEditions } from '../api/hooks'
 import { api } from '../api/client'
 import { useAuth, useMediaBase } from '../auth/AuthContext'
@@ -32,6 +32,14 @@ export default function BookPage() {
       qc.invalidateQueries({ queryKey: ['shelf'] })
     },
   })
+  const privacy = useMutation({
+    mutationFn: ({ upload, isPrivate }: { upload: number; isPrivate: boolean }) => api(`/uploads/${upload}`, { method: 'PUT', json: { isPrivate } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['book', bookId] })
+      qc.invalidateQueries({ queryKey: ['books'] })
+      qc.invalidateQueries({ queryKey: ['uploads'] })
+    },
+  })
 
   if (q.isLoading) return <Loading />
   if (q.error) return <ErrorBox error={q.error} />
@@ -44,7 +52,10 @@ export default function BookPage() {
     [t('book.date'), book.docDate],
     [t('book.added'), formatDate(book.registeredAt, i18n.language)],
     [t('book.file'), book.fileName],
+    [t('book.uploadedBy'), book.upload?.uploadedBy],
   ]
+  const upload = book.upload
+  const canChangePrivacy = !!upload && (upload.mine || !!user?.isAdmin)
 
   return (
     <article className="space-y-8">
@@ -98,6 +109,24 @@ export default function BookPage() {
               </button>
             )}
           </div>
+
+          {upload && (
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              <span className="flex items-center gap-1.5">
+                {upload.isPrivate ? <Lock className="h-4 w-4 text-accent" /> : <LockOpen className="h-4 w-4 muted" />}
+                {upload.isPrivate ? t('upload.privateNote') : t('upload.publicNote')}
+              </span>
+              {canChangePrivacy && (
+                <button
+                  className="btn-ghost"
+                  onClick={() => privacy.mutate({ upload: upload.id, isPrivate: !upload.isPrivate })}
+                  disabled={privacy.isPending}
+                >
+                  {upload.isPrivate ? t('upload.makePublic') : t('upload.makePrivate')}
+                </button>
+              )}
+            </div>
+          )}
 
           {book.genres.length > 0 && (
             <div className="flex flex-wrap gap-2">

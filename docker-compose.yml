@@ -22,12 +22,19 @@ services:
       # Nopds__Oidc__Authority: "https://auth.example.com/application/o/nopds/"
       # Nopds__Oidc__ClientId: ""
       # Nopds__Oidc__ClientSecret: ""
+      # Optional upload library: every signed-in user may upload books (public by default, or private).
+      # Uncomment together with the /uploads volume below so uploaded books live outside the container.
+      # Nopds__UploadPath: "/uploads"
+      # Nopds__UploadMaxMegabytes: "200"
     ports:
       - "8080:8080"
     volumes:
       - nopds-data:/data
       # Mount each library read-only; register it in Admin → Libraries using the container path.
       - ${NOPDS_BOOKS:-./books}:/books:ro
+      # Upload library (read-write). The host folder must be writable by the container user (UID 1654):
+      #   mkdir -p ./uploads && sudo chown 1654 ./uploads
+      # - ${NOPDS_UPLOADS:-./uploads}:/uploads
 
   postgres:
     image: postgres:17-alpine

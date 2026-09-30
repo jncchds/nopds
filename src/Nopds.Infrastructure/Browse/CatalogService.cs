@@ -28,6 +28,14 @@ public sealed class CatalogService(NopdsDbContext db, GenreCatalog genreCatalog,
             q = q.Where(b => b.LibraryId == lib);
         }
 
+        if (!scope.IsAdmin)
+        {
+            // Private uploads: only the uploader sees them (anonymous callers never do).
+            var uid = scope.UserId;
+            q = q.Where(b => !db.Uploads.Any(u => u.LibraryId == b.LibraryId && u.RelPath == b.RelPath && u.IsPrivate
+                                                  && (uid == null || u.UserId == null || u.UserId != uid)));
+        }
+
         return q;
     }
 
@@ -175,7 +183,7 @@ public sealed class CatalogService(NopdsDbContext db, GenreCatalog genreCatalog,
         var rows = await ordered.Skip((page - 1) * pageSize).Take(pageSize + 1)
             .Select(b => new
             {
-                b.Id, b.LibraryId, b.Title, b.FileName, b.Format, b.FileSize, b.Lang, b.DocDate, b.RegisteredAt, b.Annotation, b.Cover, b.DupGroupKey,
+                b.Id, b.LibraryId, b.RelPath, b.Title, b.FileName, b.Format, b.FileSize, b.Lang, b.DocDate, b.RegisteredAt, b.Annotation, b.Cover, b.DupGroupKey,
             })
             .ToListAsync(ct);
         var hasNext = rows.Count > pageSize;
@@ -197,12 +205,29 @@ public sealed class CatalogService(NopdsDbContext db, GenreCatalog genreCatalog,
                 .ToDictionaryAsync(g => g.Key, g => g.Count, ct);
         }
 
+        var uploads = new Dictionary<(int, string), UploadInfo>();
+        if (rows.Count > 0)
+        {
+            var libs = rows.Select(r => r.LibraryId).Distinct().ToList();
+            var paths = rows.Select(r => r.RelPath).Distinct().ToList();
+            var found = await db.Uploads.AsNoTracking().Where(u => libs.Contains(u.LibraryId) && paths.Contains(u.RelPath))
+                .Select(u => new
+                {
+                    u.Id, u.LibraryId, u.RelPath, u.IsPrivate, u.UserId, u.UploadedAt,
+                    UserName = db.Users.Where(x => x.Id == u.UserId).Select(x => x.UserName).FirstOrDefault(),
+                })
+                .ToListAsync(ct);
+            uploads = found.ToDictionary(u => (u.LibraryId, u.RelPath),
+                u => new UploadInfo(u.Id, u.IsPrivate, u.UserId != null && u.UserId == scope.UserId, u.UserName, u.UploadedAt));
+        }
+
         var items = rows.Select(r => new BookSummary(
             r.Id, r.LibraryId, r.Title, r.FileName, r.Format, r.FileSize, r.Lang, r.DocDate, r.RegisteredAt, r.Annotation, r.Cover,
             related.Authors.GetValueOrDefault(r.Id) ?? [],
             related.Series.GetValueOrDefault(r.Id) ?? [],
             related.Genres.GetValueOrDefault(r.Id) ?? [],
-            editions.GetValueOrDefault(r.DupGroupKey, 1))).ToList();
+            editions.GetValueOrDefault(r.DupGroupKey, 1),
+            uploads.GetValueOrDefault((r.LibraryId, r.RelPath)))).ToList();
         return new Page<BookSummary>(items, page, pageSize, hasNext, total);
     }
 
@@ -424,10 +449,10 @@ public sealed class CatalogService(NopdsDbContext db, GenreCatalog genreCatalog,
             q = q.Where(l => allowed.Contains(l.Id));
         }
 
-        var libs = await q.OrderBy(l => l.Name).Select(l => new { l.Id, l.Name, l.LastScanFinishedAt }).ToListAsync(ct);
-        var counts = await db.Books.Where(b => b.DeletedAt == null).GroupBy(b => b.LibraryId)
+        var libs = await q.OrderBy(l => l.Name).Select(l => new { l.Id, l.Name, l.LastScanFinishedAt, l.IsUploads }).ToListAsync(ct);
+        var counts = await Visible(scope with { LibraryId = null }).GroupBy(b => b.LibraryId)
             .Select(g => new { g.Key, Count = g.Count() }).ToDictionaryAsync(g => g.Key, g => g.Count, ct);
-        return libs.Select(l => new LibraryInfo(l.Id, l.Name, counts.GetValueOrDefault(l.Id), l.LastScanFinishedAt)).ToList();
+        return libs.Select(l => new LibraryInfo(l.Id, l.Name, counts.GetValueOrDefault(l.Id), l.LastScanFinishedAt, l.IsUploads)).ToList();
     }
 
     public async Task<CatalogListing?> CatalogAsync(Scope scope, int libraryId, long? catalogId, int page, int pageSize, CancellationToken ct = default)
@@ -455,7 +480,10 @@ public sealed class CatalogService(NopdsDbContext db, GenreCatalog genreCatalog,
             breadcrumbs.Insert(0, Node(cursor));
         }
 
+        // Archives holding only other users' private uploads are not listed.
+        var visible = Visible(scope with { LibraryId = libraryId });
         var children = await db.Catalogs.AsNoTracking().Where(c => c.ParentId == current.Id)
+            .Where(c => c.Type == CatalogType.Directory || visible.Any(b => b.CatalogId == c.Id))
             .OrderBy(c => c.Type == CatalogType.Directory ? 0 : 1).ThenBy(c => c.Name)
             .Select(c => new CatalogNode(c.Id, c.Name, c.Path, c.Type, c.LibraryId)).ToListAsync(ct);
         var books = await BooksAsync(scope with { HideDuplicates = false, LibraryId = libraryId },
@@ -469,7 +497,8 @@ public sealed class CatalogService(NopdsDbContext db, GenreCatalog genreCatalog,
 
     public async Task<Stats> StatsAsync(Scope scope, CancellationToken ct = default)
     {
-        var key = $"{StatsCacheKey}:{(scope.AllowedLibraries is null ? "all" : string.Join(',', scope.AllowedLibraries))}:{scope.LibraryId}";
+        var viewer = scope.IsAdmin ? "admin" : scope.UserId?.ToString("N") ?? "anon";
+        var key = $"{StatsCacheKey}:{viewer}:{(scope.AllowedLibraries is null ? "all" : string.Join(',', scope.AllowedLibraries))}:{scope.LibraryId}";
         if (cache.TryGetValue(key, out Stats? cached) && cached is not null)
         {
             return cached;

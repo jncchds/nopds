@@ -30,7 +30,7 @@ export default function Libraries() {
   const qc = useQueryClient()
   const libs = useQuery({ queryKey: ['admin', 'libraries'], queryFn: () => api<LibraryDto[]>('/admin/libraries') })
   const status = useScanStatus()
-  const [editing, setEditing] = useState<{ id?: number; value: LibraryInput } | null>(null)
+  const [editing, setEditing] = useState<{ id?: number; value: LibraryInput; uploads?: boolean } | null>(null)
 
   const scan = useMutation({ mutationFn: (id: number) => api(`/admin/libraries/${id}/scan`, { method: 'POST' }) })
   const cancel = useMutation({ mutationFn: (id: number) => api(`/admin/libraries/${id}/scan`, { method: 'DELETE' }) })
@@ -60,6 +60,7 @@ export default function Libraries() {
               <div className="min-w-0">
                 <h3 className="font-semibold">
                   {l.name} {!l.enabled && <span className="ml-2 text-xs muted">({t('admin.disabled')})</span>}
+                  {l.isUploads && <span className="ml-2 pill-muted" title={t('admin.uploadsHint')}>📤 {t('admin.uploads')}</span>}
                 </h3>
                 <p className="truncate font-mono text-xs muted">{l.rootPath}</p>
                 {!l.rootExists && (
@@ -77,10 +78,12 @@ export default function Libraries() {
                 ) : (
                   <button className="btn-secondary" onClick={() => scan.mutate(l.id)}><Play className="h-4 w-4" /> {t('admin.scan')}</button>
                 )}
-                <button className="btn-ghost px-2" onClick={() => setEditing({ id: l.id, value: l })} aria-label={t('common.edit')}><Pencil className="h-4 w-4" /></button>
-                <button className="btn-ghost px-2 text-red-600" onClick={() => confirm(t('admin.confirmDeleteLibrary', { name: l.name })) && remove.mutate(l.id)} aria-label={t('common.delete')}>
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <button className="btn-ghost px-2" onClick={() => setEditing({ id: l.id, value: l, uploads: l.isUploads })} aria-label={t('common.edit')}><Pencil className="h-4 w-4" /></button>
+                {!l.isUploads && (
+                  <button className="btn-ghost px-2 text-red-600" onClick={() => confirm(t('admin.confirmDeleteLibrary', { name: l.name })) && remove.mutate(l.id)} aria-label={t('common.delete')}>
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
               </div>
             </div>
             {s && s.state !== 'idle' ? (
@@ -91,7 +94,7 @@ export default function Libraries() {
           </div>
         )
       })}
-      {editing && <LibraryForm initial={editing.value} id={editing.id} onClose={() => setEditing(null)} />}
+      {editing && <LibraryForm initial={editing.value} id={editing.id} uploads={editing.uploads} onClose={() => setEditing(null)} />}
     </div>
   )
 }
@@ -150,7 +153,8 @@ function ScanLine({ s, lang }: { s: ScanStatus; lang: string }) {
   )
 }
 
-function LibraryForm({ initial, id, onClose }: { initial: LibraryInput; id?: number; onClose: () => void }) {
+/** @param uploads The upload library: its folder comes from Nopds:UploadPath and missing books are always hidden. */
+function LibraryForm({ initial, id, uploads, onClose }: { initial: LibraryInput; id?: number; uploads?: boolean; onClose: () => void }) {
   const { t } = useTranslation()
   const qc = useQueryClient()
   const [v, setV] = useState<LibraryInput>({ ...EMPTY, ...initial })
@@ -188,9 +192,12 @@ function LibraryForm({ initial, id, onClose }: { initial: LibraryInput; id?: num
         <label className="block">
           <span className="label">{t('admin.rootPath')}</span>
           <div className="flex gap-2">
-            <input className="input font-mono text-xs" value={v.rootPath} onChange={(e) => set('rootPath', e.target.value)} required />
-            <button type="button" className="btn-secondary shrink-0" onClick={() => setPicker(true)}><Folder className="h-4 w-4" /> {t('admin.browse')}</button>
+            <input className="input font-mono text-xs" value={v.rootPath} onChange={(e) => set('rootPath', e.target.value)} required readOnly={uploads} />
+            {!uploads && (
+              <button type="button" className="btn-secondary shrink-0" onClick={() => setPicker(true)}><Folder className="h-4 w-4" /> {t('admin.browse')}</button>
+            )}
           </div>
+          {uploads && <span className="mt-1 block text-xs muted">{t('admin.uploadsHint')}</span>}
           {err('rootPath')}
         </label>
         <label className="block">
@@ -219,7 +226,7 @@ function LibraryForm({ initial, id, onClose }: { initial: LibraryInput; id?: num
           <Toggle checked={v.inpxTestZip} onChange={(x) => set('inpxTestZip', x)} label={t('admin.inpxTestZip')} />
           <Toggle checked={v.inpxTestFiles} onChange={(x) => set('inpxTestFiles', x)} label={t('admin.inpxTestFiles')} />
           <Toggle checked={v.watchEnabled} onChange={(x) => set('watchEnabled', x)} label={t('admin.watch')} hint={t('admin.watchHint')} />
-          <Toggle checked={v.deleteLogical} onChange={(x) => set('deleteLogical', x)} label={t('admin.softDelete')} hint={t('admin.softDeleteHint')} />
+          {!uploads && <Toggle checked={v.deleteLogical} onChange={(x) => set('deleteLogical', x)} label={t('admin.softDelete')} hint={t('admin.softDeleteHint')} />}
           <Toggle checked={v.hashContent} onChange={(x) => set('hashContent', x)} label={t('admin.hash')} hint={t('admin.hashHint')} />
         </div>
         <div className="flex justify-end gap-2 border-t border-line pt-4">

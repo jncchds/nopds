@@ -65,6 +65,7 @@ export function Layout() {
     { to: '/genres', icon: '🏷️', label: t('nav.genres') },
     { to: '/folders', icon: '🗂️', label: t('nav.folders') },
     ...(user ? [{ to: '/shelf', icon: '🔖', label: t('nav.shelf') }] : []),
+    ...(user && config.data?.uploads ? [{ to: '/upload', icon: '📤', label: t('nav.upload') }] : []),
     ...(user ? [{ to: '/settings', icon: '⚙️', label: t('nav.settings') }] : []),
     ...(user?.isAdmin ? [{ to: '/admin', icon: '🛡️', label: t('nav.admin') }] : []),
   ]

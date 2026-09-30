@@ -1,5 +1,13 @@
 # Release Notes
 
+## v0.1.3 — 2026-09-30
+
+- feat: optional upload library — set `Nopds__UploadPath` and a library for that folder is created (scanned, tracked and browsable like any other); every signed-in user can upload books from the new **Upload** page, including users restricted to other libraries
+- feat: uploaded books are public by default and can be made private at upload time or later (upload page, book page); private books are visible only to the uploader and admins everywhere — web app, OPDS, downloads, covers and the Telegram bot
+- feat: books the scanner finds in the upload folder without an uploader (copied in by hand, or there before uploads were enabled) become public uploads of the first user, who can then manage their privacy
+- feat: when a scan finds an uploaded file missing, its book is hidden rather than removed, so owner and privacy survive a remount; the upload list marks it as missing
+- feat: docker-compose offers a bind mount for `/uploads` so uploaded books live outside the container; `Nopds__UploadMaxMegabytes` (default 200) caps one upload
+
 ## v0.1.2 — 2026-09-28
 
 - feat: built-in EPUB converters for DOCX, ODT, RTF, TXT (encoding and chapter detection) and HTML alongside FB2 — headings become chapters, formatting, lists, tables, links, images and footnotes are kept; catalog metadata fills in what the file lacks

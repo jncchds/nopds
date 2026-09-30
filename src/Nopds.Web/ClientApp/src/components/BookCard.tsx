@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import clsx from 'clsx'
+import { Lock } from 'lucide-react'
 import type { BookSummary } from '../api/types'
 import { useMediaBase } from '../auth/AuthContext'
 import { useViewMode } from '../hooks/useViewMode'
@@ -16,6 +17,11 @@ export function BookTile({ book, progress }: { book: BookSummary; progress?: num
     <Link to={`/book/${book.id}`} className="group block min-w-0" title={book.title}>
       <div className="relative transition-transform duration-200 group-hover:-translate-y-0.5">
         <Cover book={book} />
+        {book.upload?.isPrivate && (
+          <span className="absolute top-1.5 left-1.5 rounded bg-black/65 p-1 text-white" title={t('upload.isPrivate')}>
+            <Lock className="h-3 w-3" />
+          </span>
+        )}
         {book.editions > 1 && (
           <span className="absolute top-1.5 right-1.5 rounded bg-black/65 px-1.5 py-0.5 text-[10px] text-white" title={t('book.editions', { count: book.editions })}>
             ×{book.editions}
@@ -60,6 +66,7 @@ export function BookRow({ book, progress }: { book: BookSummary; progress?: numb
           {book.genres.slice(0, 3).map((g) => <Link key={g.id} to={`/genres/${g.section}?genre=${g.id}`} className="chip">{g.name}</Link>)}
           {book.lang && <span className="pill-muted">{book.lang}</span>}
           <span className="pill-leaf uppercase">{book.format}</span>
+          {book.upload?.isPrivate && <span className="pill-muted flex items-center gap-1"><Lock className="h-3 w-3" /> {t('upload.isPrivate')}</span>}
         </div>
         {book.annotation && <p className="line-clamp-3 text-sm leading-relaxed muted">{book.annotation}</p>}
         {progress !== undefined && progress > 0 && (

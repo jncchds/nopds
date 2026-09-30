@@ -3,7 +3,8 @@ using Nopds.Domain.Entities;
 namespace Nopds.Infrastructure.Browse;
 
 /// <summary>Visibility of the catalog for the current caller.</summary>
-public sealed record Scope(int[]? AllowedLibraries, int? LibraryId, bool HideDuplicates, string[] PreferredFormats, string Lang, Guid? UserId = null)
+/// <param name="IsAdmin">Admins also see other users' private uploads.</param>
+public sealed record Scope(int[]? AllowedLibraries, int? LibraryId, bool HideDuplicates, string[] PreferredFormats, string Lang, Guid? UserId = null, bool IsAdmin = false)
 {
     public Scope WithLibrary(int? libraryId) => this with { LibraryId = libraryId };
 }
@@ -91,7 +92,12 @@ public sealed record BookSummary(
     IReadOnlyList<AuthorRef> Authors,
     IReadOnlyList<SeriesInfo> Series,
     IReadOnlyList<GenreRef> Genres,
-    int Editions);
+    int Editions,
+    UploadInfo? Upload = null);
+
+/// <summary>Set for books that came from a user upload.</summary>
+/// <param name="Mine">The caller uploaded it (and may change its privacy).</param>
+public sealed record UploadInfo(long Id, bool IsPrivate, bool Mine, string? UploadedBy, DateTimeOffset UploadedAt);
 
 public sealed record NamedCount(long Id, string Name, int Books);
 
@@ -101,7 +107,7 @@ public sealed record GenreSectionInfo(string Key, string Name, int Books);
 
 public sealed record GenreInfo(int Id, string Code, string Name, string Section, int Books);
 
-public sealed record LibraryInfo(int Id, string Name, int Books, DateTimeOffset? LastScanFinishedAt);
+public sealed record LibraryInfo(int Id, string Name, int Books, DateTimeOffset? LastScanFinishedAt, bool IsUploads = false);
 
 public sealed record CatalogNode(long Id, string Name, string Path, CatalogType Type, int? LibraryId);
 

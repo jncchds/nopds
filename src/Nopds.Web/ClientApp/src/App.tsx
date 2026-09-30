@@ -17,6 +17,7 @@ const Folders = lazy(() => import('./pages/Folders'))
 const Search = lazy(() => import('./pages/Search'))
 const BookPage = lazy(() => import('./pages/BookPage'))
 const Shelf = lazy(() => import('./pages/Shelf'))
+const Upload = lazy(() => import('./pages/Upload'))
 const Settings = lazy(() => import('./pages/Settings'))
 const Reader = lazy(() => import('./pages/Reader'))
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
@@ -63,6 +64,7 @@ export default function App() {
           <Route path="search" element={<Search />} />
           <Route path="book/:id" element={<BookPage />} />
           <Route path="shelf" element={<Guard user><Shelf /></Guard>} />
+          <Route path="upload" element={<Guard user><Upload /></Guard>} />
           <Route path="settings" element={<Guard user><Settings /></Guard>} />
           <Route path="admin" element={<Guard admin><AdminLayout /></Guard>}>
             <Route index element={<Libraries />} />

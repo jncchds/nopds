@@ -65,6 +65,9 @@ public sealed class LibraryScanner(
         await using (var db = await dbFactory.CreateDbContextAsync(ct))
         {
             library = await db.Libraries.AsNoTracking().FirstAsync(l => l.Id == libraryId, ct);
+
+            // Uploaded books are only hidden when their file is missing, so owner and privacy survive a remount.
+            library.DeleteLogical |= library.IsUploads;
             await db.Libraries.Where(l => l.Id == libraryId)
                 .ExecuteUpdateAsync(s => s.SetProperty(l => l.LastScanStartedAt, DateTimeOffset.UtcNow), ct);
         }
@@ -128,6 +131,10 @@ public sealed class LibraryScanner(
         }
 
         await FinishAsync(run, ct);
+        if (library.IsUploads)
+        {
+            await ClaimUnownedAsync(library.Id, ct);
+        }
         await tickCts.CancelAsync();
         await reporter;
     }
@@ -680,6 +687,30 @@ public sealed class LibraryScanner(
         if (missing.Count > 0 && !run.Library.DeleteLogical)
         {
             await CleanupAsync(db, run.Library.Id, ct);
+        }
+    }
+
+    /// <summary>
+    /// Files put into the upload folder by other means (copied in by hand, left from before) count as public uploads
+    /// of the first user, so every book there has an owner who can manage it.
+    /// </summary>
+    private async Task ClaimUnownedAsync(int libraryId, CancellationToken ct)
+    {
+        await using var db = await dbFactory.CreateDbContextAsync(ct);
+        var claimed = await db.Database.ExecuteSqlInterpolatedAsync($"""
+            INSERT INTO uploads (library_id, rel_path, original_name, user_id, is_private, file_size, uploaded_at)
+            SELECT DISTINCT ON (b.rel_path) b.library_id, b.rel_path, left(regexp_replace(b.rel_path, '^.*/', ''), 512), owner.id, FALSE,
+                   b.file_size, b.registered_at
+            FROM books b
+            CROSS JOIN (SELECT id FROM users ORDER BY created_at, id LIMIT 1) owner
+            WHERE b.library_id = {libraryId}
+              AND NOT EXISTS (SELECT 1 FROM uploads u WHERE u.library_id = b.library_id AND u.rel_path = b.rel_path)
+            ORDER BY b.rel_path, b.id
+            ON CONFLICT (library_id, rel_path) DO NOTHING
+            """, ct);
+        if (claimed > 0)
+        {
+            log.LogInformation("Upload library {Library}: {Count} files without an uploader assigned to the first user", libraryId, claimed);
         }
     }
 

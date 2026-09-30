@@ -10,7 +10,7 @@ using Testcontainers.PostgreSql;
 namespace Nopds.Tests.Integration;
 
 /// <summary>Runs the whole app against a throwaway PostgreSQL container with a sample library on disk.</summary>
-public sealed class AppFixture : IAsyncLifetime
+public class AppFixture : IAsyncLifetime
 {
     public const string AdminUser = "admin";
     public const string AdminPassword = "admin-pass-123";
@@ -35,8 +35,14 @@ public sealed class AppFixture : IAsyncLifetime
             b.UseSetting("Nopds:CacheDir", Path.Combine(Root, "data", "cache"));
             b.UseSetting("Nopds:AdminUser", AdminUser);
             b.UseSetting("Nopds:AdminPassword", AdminPassword);
+            Configure(b);
         });
         _ = _factory.Server;
+    }
+
+    /// <summary>Extra host settings for fixtures that need their own app instance.</summary>
+    protected virtual void Configure(IWebHostBuilder builder)
+    {
     }
 
     public async Task DisposeAsync()
@@ -83,10 +89,12 @@ public sealed class AppFixture : IAsyncLifetime
         w.Write(inp);
     }
 
-    public async Task<HttpClient> AdminClientAsync()
+    public Task<HttpClient> AdminClientAsync() => ClientAsync(AdminUser, AdminPassword);
+
+    public async Task<HttpClient> ClientAsync(string userName, string password)
     {
         var client = Factory.CreateClient(new WebApplicationFactoryClientOptions { HandleCookies = true });
-        var res = await client.PostAsJsonAsync("/api/v1/auth/login", new { userName = AdminUser, password = AdminPassword });
+        var res = await client.PostAsJsonAsync("/api/v1/auth/login", new { userName, password });
         res.EnsureSuccessStatusCode();
         var auth = await res.Content.ReadFromJsonAsync<JsonElement>(Json);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.GetProperty("accessToken").GetString());

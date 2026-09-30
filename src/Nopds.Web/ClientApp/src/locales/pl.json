@@ -36,7 +36,8 @@
     "series": "Serie",
     "settings": "Ustawienia",
     "shelf": "Moja półka",
-    "skip": "Przejdź do treści"
+    "skip": "Przejdź do treści",
+    "upload": "Prześlij"
   },
   "auth": {
     "invalid": "Nieprawidłowa nazwa użytkownika lub hasło.",
@@ -105,7 +106,8 @@
     "read": "Czytaj",
     "removeShelf": "Usuń z półki",
     "size": "Rozmiar",
-    "unknownAuthor": "Nieznany autor"
+    "unknownAuthor": "Nieznany autor",
+    "uploadedBy": "Przesłane przez"
   },
   "author": {
     "allBooks": "Wszystkie książki",
@@ -246,7 +248,9 @@
     "approve": "Zatwierdź",
     "sso": "Logowanie jednokrotne (SSO)",
     "ssoRequireApproval": "Nowi użytkownicy SSO wymagają zatwierdzenia",
-    "ssoRequireApprovalHint": "Konta utworzone przy pierwszym logowaniu przez dostawcę tożsamości czekają na zatwierdzenie przez administratora. Samego dostawcę konfiguruje się zmiennymi środowiskowymi Nopds__Oidc__*."
+    "ssoRequireApprovalHint": "Konta utworzone przy pierwszym logowaniu przez dostawcę tożsamości czekają na zatwierdzenie przez administratora. Samego dostawcę konfiguruje się zmiennymi środowiskowymi Nopds__Oidc__*.",
+    "uploads": "Przesłane",
+    "uploadsHint": "Tutaj użytkownicy przesyłają książki. Folder ustawia Nopds__UploadPath; brakujące pliki są tylko ukrywane, nigdy usuwane."
   },
   "scan": {
     "archives": "Archiwa skanowane/pominięte",
@@ -265,5 +269,28 @@
     "label": "Widok",
     "list": "Lista",
     "grid": "Okładki"
+  },
+  "upload": {
+    "disabled": "Przesyłanie książek jest wyłączone na tym serwerze.",
+    "subtitle": "Dodawaj książki do wspólnej biblioteki przesłanych. Są publiczne, chyba że oznaczysz je jako prywatne.",
+    "choose": "Wybierz pliki lub upuść je tutaj",
+    "maxSize": "do {{size}} MB naraz",
+    "private": "Prywatne",
+    "privateHint": "Te książki zobaczysz tylko ty i administratorzy — również w OPDS i bocie Telegram.",
+    "tooBig": "Wybrane pliki przekraczają {{size}} MB.",
+    "submit": "Prześlij",
+    "uploading": "Przesyłanie…",
+    "mine": "Moje przesłane",
+    "all": "Wszystkie przesłane",
+    "empty": "Nic jeszcze nie przesłano.",
+    "missing": "Brak pliku",
+    "processing": "Przetwarzanie",
+    "unrecognized": "Nie rozpoznano",
+    "makePublic": "Upublicznij",
+    "makePrivate": "Ustaw jako prywatną",
+    "isPrivate": "Prywatna",
+    "isPublic": "Publiczna",
+    "privateNote": "Prywatna: widzą ją tylko przesyłający i administratorzy",
+    "publicNote": "Przesłana książka, widoczna dla wszystkich"
   }
 }

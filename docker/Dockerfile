@@ -40,7 +40,7 @@ ENV ASPNETCORE_HTTP_PORTS=8080 \
     Nopds__CacheDir=/data/cache \
     DOTNET_gcServer=0
 # A new named volume inherits this ownership, so the non-root app user can write to it.
-RUN mkdir -p /data/cache && chown -R $APP_UID /data
+RUN mkdir -p /data/cache /uploads && chown -R $APP_UID /data /uploads
 VOLUME ["/data"]
 EXPOSE 8080
 USER $APP_UID

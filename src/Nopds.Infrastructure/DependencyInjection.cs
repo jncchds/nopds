@@ -32,6 +32,7 @@ public static class DependencyInjection
         services.AddSingleton<SettingsStore>();
         services.AddScoped<DatabaseInitializer>();
         services.AddScoped<Browse.CatalogService>();
+        services.AddSingleton<Uploads.UploadLibrary>();
         return services;
     }
 }

@@ -18,7 +18,7 @@ public static class AdminEndpoints
         int Id, string Name, string RootPath, bool Enabled, string[] Extensions, bool ScanZip, string ZipCodepage,
         bool InpxEnabled, bool InpxSkipUnchanged, bool InpxTestZip, bool InpxTestFiles, bool WatchEnabled, string? ScanCron,
         bool DeleteLogical, bool HashContent, DateTimeOffset? LastScanStartedAt, DateTimeOffset? LastScanFinishedAt, string? LastScanSummary,
-        int Books, bool RootExists);
+        int Books, bool RootExists, bool IsUploads);
 
     public sealed record LibraryInput(
         string Name, string RootPath, bool? Enabled, string[]? Extensions, bool? ScanZip, string? ZipCodepage,
@@ -75,7 +75,9 @@ public static class AdminEndpoints
                 return Results.NotFound();
             }
 
-            var root = NormalizeRoot(input.RootPath);
+            // The upload library's folder comes from Nopds:UploadPath, and it always keeps missing books hidden.
+            var root = lib.IsUploads ? lib.RootPath : NormalizeRoot(input.RootPath);
+            input = lib.IsUploads ? input with { DeleteLogical = true } : input;
             if (Validate(input, root) is { } error)
             {
                 return error;
@@ -91,6 +93,11 @@ public static class AdminEndpoints
 
         g.MapDelete("/libraries/{id:int}", async (int id, NopdsDbContext db, ScanCoordinator scans, CancellationToken ct) =>
         {
+            if (await db.Libraries.AnyAsync(l => l.Id == id && l.IsUploads, ct))
+            {
+                return Results.Conflict(new { error = "The upload library is configured by Nopds:UploadPath; unset it to remove the library." });
+            }
+
             scans.Cancel(id);
             // Bulk deletes: much faster than cascading through the change tracker.
             await db.Books.Where(b => b.LibraryId == id).ExecuteDeleteAsync(ct);
@@ -345,7 +352,7 @@ public static class AdminEndpoints
     private static LibraryDto ToDto(Library l, int books) => new(
         l.Id, l.Name, l.RootPath, l.Enabled, l.Extensions, l.ScanZip, l.ZipCodepage, l.InpxEnabled, l.InpxSkipUnchanged, l.InpxTestZip,
         l.InpxTestFiles, l.WatchEnabled, l.ScanCron, l.DeleteLogical, l.HashContent, l.LastScanStartedAt, l.LastScanFinishedAt, l.LastScanSummary,
-        books, Directory.Exists(l.RootPath));
+        books, Directory.Exists(l.RootPath), l.IsUploads);
 
     private static AdminUserDto ToDto(AppUser u, string? sso = null) => new(
         u.Id, u.UserName ?? "", u.IsAdmin, u.AllowedLibraryIds, u.LockoutEnd is { } e && e > DateTimeOffset.UtcNow, u.IsApproved, u.CreatedAt,

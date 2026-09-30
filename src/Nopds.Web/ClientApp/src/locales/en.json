@@ -34,7 +34,8 @@
     "series": "Series",
     "settings": "Settings",
     "shelf": "My bookshelf",
-    "skip": "Skip to content"
+    "skip": "Skip to content",
+    "upload": "Upload"
   },
   "auth": {
     "invalid": "Wrong user name or password.",
@@ -101,7 +102,8 @@
     "read": "Read",
     "removeShelf": "Remove from shelf",
     "size": "Size",
-    "unknownAuthor": "Unknown author"
+    "unknownAuthor": "Unknown author",
+    "uploadedBy": "Uploaded by"
   },
   "author": {
     "allBooks": "All books",
@@ -240,7 +242,9 @@
     "approve": "Approve",
     "sso": "Single sign-on",
     "ssoRequireApproval": "New single sign-on users need approval",
-    "ssoRequireApprovalHint": "Accounts created on first sign-in via the identity provider stay pending until an administrator approves them. The provider itself is configured with Nopds__Oidc__* environment variables."
+    "ssoRequireApprovalHint": "Accounts created on first sign-in via the identity provider stay pending until an administrator approves them. The provider itself is configured with Nopds__Oidc__* environment variables.",
+    "uploads": "Uploads",
+    "uploadsHint": "Users upload books here. The folder is set by Nopds__UploadPath; missing files are always hidden, never removed."
   },
   "scan": {
     "archives": "Archives scanned/skipped",
@@ -259,5 +263,28 @@
     "label": "View",
     "list": "List",
     "grid": "Covers"
+  },
+  "upload": {
+    "disabled": "Uploading is not enabled on this server.",
+    "subtitle": "Add books to the shared upload library. They are public unless you mark them private.",
+    "choose": "Choose files or drop them here",
+    "maxSize": "up to {{size}} MB per upload",
+    "private": "Private",
+    "privateHint": "Only you and administrators will see these books, including in OPDS and the Telegram bot.",
+    "tooBig": "The selected files exceed {{size}} MB.",
+    "submit": "Upload",
+    "uploading": "Uploading…",
+    "mine": "My uploads",
+    "all": "All uploads",
+    "empty": "Nothing uploaded yet.",
+    "missing": "File missing",
+    "processing": "Processing",
+    "unrecognized": "Not recognized",
+    "makePublic": "Make public",
+    "makePrivate": "Make private",
+    "isPrivate": "Private",
+    "isPublic": "Public",
+    "privateNote": "Private: only the uploader and administrators see this book",
+    "publicNote": "Uploaded book, visible to everyone"
   }
 }

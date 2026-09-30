@@ -24,6 +24,15 @@ public sealed class NopdsOptions
     /// </summary>
     public bool AdminForce { get; set; }
 
+    /// <summary>
+    /// Folder of the shared upload library. When set, a library for it is created and every signed-in user may upload
+    /// books there (public by default, optionally private). Uploads are off when empty.
+    /// </summary>
+    public string? UploadPath { get; set; }
+
+    /// <summary>Largest accepted upload, in megabytes.</summary>
+    public int UploadMaxMegabytes { get; set; } = 200;
+
     public JwtOptions Jwt { get; set; } = new();
 
     public OidcOptions Oidc { get; set; } = new();

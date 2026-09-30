@@ -11,6 +11,7 @@ using Nopds.Infrastructure.Browse;
 using Nopds.Infrastructure.Data;
 using Nopds.Infrastructure.Identity;
 using Nopds.Infrastructure.Settings;
+using Nopds.Infrastructure.Uploads;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -80,7 +81,9 @@ internal sealed class BotUpdateHandler(IServiceScopeFactory scopes, SettingsStor
         }
 
         var lang = UiLanguages.Match(user?.UiLanguage) ?? UiLanguages.Match(from.LanguageCode) ?? UiLanguages.Default;
-        var scope = new Scope(user?.IsAdmin == true ? null : user?.AllowedLibraryIds, null, user?.HideDuplicates ?? s.HideDuplicates, s.PreferredFormats, lang, user?.Id);
+        var isAdmin = user?.IsAdmin == true;
+        var allowed = isAdmin ? null : sp.GetRequiredService<UploadLibrary>().Extend(user?.AllowedLibraryIds);
+        var scope = new Scope(allowed, null, user?.HideDuplicates ?? s.HideDuplicates, s.PreferredFormats, lang, user?.Id, isAdmin);
         return new Caller(user, scope, lang);
     }
 

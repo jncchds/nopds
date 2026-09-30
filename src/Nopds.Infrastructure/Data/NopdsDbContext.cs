@@ -20,6 +20,7 @@ public class NopdsDbContext(DbContextOptions<NopdsDbContext> options) : Identity
     public DbSet<KoreaderProgress> KoreaderProgress => Set<KoreaderProgress>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Setting> Settings => Set<Setting>();
+    public DbSet<Upload> Uploads => Set<Upload>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -162,6 +163,16 @@ public class NopdsDbContext(DbContextOptions<NopdsDbContext> options) : Identity
             e.Property(x => x.ReplacedByHash).HasMaxLength(64);
             e.Property(x => x.UserAgent).HasMaxLength(512);
             e.HasOne<AppUser>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        b.Entity<Upload>(e =>
+        {
+            e.Property(x => x.RelPath).HasMaxLength(2048);
+            e.Property(x => x.OriginalName).HasMaxLength(512);
+            e.HasIndex(x => new { x.LibraryId, x.RelPath }).IsUnique();
+            e.HasIndex(x => x.UserId);
+            e.HasOne(x => x.Library).WithMany().HasForeignKey(x => x.LibraryId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne<AppUser>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.SetNull);
         });
 
         b.Entity<Setting>(e =>

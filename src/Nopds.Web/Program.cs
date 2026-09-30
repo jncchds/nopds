@@ -11,6 +11,7 @@ using Nopds.Formats.Covers;
 using Nopds.Infrastructure;
 using Nopds.Infrastructure.Data;
 using Nopds.Infrastructure.Settings;
+using Nopds.Infrastructure.Uploads;
 using Nopds.Scanner;
 using Nopds.Telegram;
 using Nopds.Web.Auth;
@@ -147,6 +148,9 @@ await using (var scope = app.Services.CreateAsyncScope())
 {
     await scope.ServiceProvider.GetRequiredService<DatabaseInitializer>()
         .InitializeAsync(nopds.AutoMigrate, nopds.AdminUser, nopds.AdminPassword, nopds.AdminForce);
+    var uploadPath = string.IsNullOrWhiteSpace(nopds.UploadPath) ? null : Path.GetFullPath(nopds.UploadPath, builder.Environment.ContentRootPath);
+    await app.Services.GetRequiredService<UploadLibrary>().InitializeAsync(
+        scope.ServiceProvider.GetRequiredService<NopdsDbContext>(), uploadPath, app.Logger);
 }
 
 app.UseForwardedHeaders();
@@ -178,6 +182,7 @@ var api = app.MapGroup("/api/v1");
 api.MapAuthEndpoints();
 api.MapBrowseEndpoints();
 api.MapReadingEndpoints();
+api.MapUploadEndpoints(nopds.UploadMaxMegabytes);
 api.MapAdminEndpoints();
 app.MapHub<ScanHub>("/hubs/scan");
 app.MapOpds();

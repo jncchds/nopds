@@ -8,6 +8,12 @@ public class Library
     public required string RootPath { get; set; }
     public bool Enabled { get; set; } = true;
 
+    /// <summary>
+    /// The shared upload library (configured by Nopds:UploadPath): every user may add books to it and keep them private.
+    /// Books whose files disappear are always hidden, never removed, so their owners and privacy survive.
+    /// </summary>
+    public bool IsUploads { get; set; }
+
     /// <summary>Extensions (without dot) that are indexed.</summary>
     public string[] Extensions { get; set; } = ["fb2", "epub", "mobi", "azw3", "pdf", "djvu", "txt", "rtf", "doc", "docx", "odt", "cbz"];
 

@@ -34,7 +34,8 @@
     "series": "Serien",
     "settings": "Einstellungen",
     "shelf": "Mein Bücherregal",
-    "skip": "Zum Inhalt springen"
+    "skip": "Zum Inhalt springen",
+    "upload": "Hochladen"
   },
   "auth": {
     "invalid": "Falscher Benutzername oder falsches Passwort.",
@@ -101,7 +102,8 @@
     "read": "Lesen",
     "removeShelf": "Aus dem Regal entfernen",
     "size": "Größe",
-    "unknownAuthor": "Unbekannter Autor"
+    "unknownAuthor": "Unbekannter Autor",
+    "uploadedBy": "Hochgeladen von"
   },
   "author": {
     "allBooks": "Alle Bücher",
@@ -240,7 +242,9 @@
     "approve": "Freigeben",
     "sso": "Single Sign-on",
     "ssoRequireApproval": "Neue SSO-Benutzer müssen freigegeben werden",
-    "ssoRequireApprovalHint": "Konten, die bei der ersten Anmeldung über den Identitätsanbieter angelegt werden, bleiben gesperrt, bis ein Administrator sie freigibt. Der Anbieter selbst wird über die Umgebungsvariablen Nopds__Oidc__* konfiguriert."
+    "ssoRequireApprovalHint": "Konten, die bei der ersten Anmeldung über den Identitätsanbieter angelegt werden, bleiben gesperrt, bis ein Administrator sie freigibt. Der Anbieter selbst wird über die Umgebungsvariablen Nopds__Oidc__* konfiguriert.",
+    "uploads": "Uploads",
+    "uploadsHint": "Hier laden Benutzer Bücher hoch. Der Ordner wird über Nopds__UploadPath festgelegt; fehlende Dateien werden nur ausgeblendet, nie entfernt."
   },
   "scan": {
     "archives": "Archive gescannt/übersprungen",
@@ -259,5 +263,28 @@
     "label": "Ansicht",
     "list": "Liste",
     "grid": "Cover"
+  },
+  "upload": {
+    "disabled": "Das Hochladen ist auf diesem Server nicht aktiviert.",
+    "subtitle": "Füge Bücher zur gemeinsamen Upload-Bibliothek hinzu. Sie sind öffentlich, sofern du sie nicht als privat markierst.",
+    "choose": "Dateien auswählen oder hierher ziehen",
+    "maxSize": "bis {{size}} MB pro Upload",
+    "private": "Privat",
+    "privateHint": "Nur du und Administratoren sehen diese Bücher – auch per OPDS und im Telegram-Bot.",
+    "tooBig": "Die ausgewählten Dateien überschreiten {{size}} MB.",
+    "submit": "Hochladen",
+    "uploading": "Wird hochgeladen…",
+    "mine": "Meine Uploads",
+    "all": "Alle Uploads",
+    "empty": "Noch nichts hochgeladen.",
+    "missing": "Datei fehlt",
+    "processing": "Wird verarbeitet",
+    "unrecognized": "Nicht erkannt",
+    "makePublic": "Öffentlich machen",
+    "makePrivate": "Privat machen",
+    "isPrivate": "Privat",
+    "isPublic": "Öffentlich",
+    "privateNote": "Privat: nur die hochladende Person und Administratoren sehen dieses Buch",
+    "publicNote": "Hochgeladenes Buch, für alle sichtbar"
   }
 }

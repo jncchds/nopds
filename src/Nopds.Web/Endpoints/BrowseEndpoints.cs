@@ -13,16 +13,27 @@ public static class BrowseEndpoints
     public sealed record BookDetails(BookSummary Book, IReadOnlyList<string> ConvertTargets, bool OnShelf, string? KoreaderHash);
 
     public sealed record SiteConfig(string Title, string Subtitle, string Version, AccessMode Access, bool AlphabetMenu, int SplitItems, int PageSize, bool ShowCovers, string[] Languages, string? Sso,
-        IReadOnlyList<string> ReaderConversions);
+        IReadOnlyList<string> ReaderConversions, UploadConfig? Uploads);
+
+    /// <summary>Present when users may upload books.</summary>
+    public sealed record UploadConfig(int LibraryId, string[] Extensions, int MaxMegabytes);
 
     public static void MapBrowseEndpoints(this IEndpointRouteBuilder api)
     {
-        api.MapGet("/config", (SettingsStore settings, ConversionService conversion, Microsoft.Extensions.Options.IOptions<NopdsOptions> options) =>
+        api.MapGet("/config", async (SettingsStore settings, ConversionService conversion, Microsoft.Extensions.Options.IOptions<NopdsOptions> options,
+            Nopds.Infrastructure.Uploads.UploadLibrary uploads, Nopds.Infrastructure.Data.NopdsDbContext db, CancellationToken ct) =>
         {
             var s = settings.Current;
             var version = typeof(BrowseEndpoints).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
+            UploadConfig? upload = null;
+            if (uploads.Id is { } uploadId)
+            {
+                var extensions = await UploadEndpoints.AcceptedExtensionsAsync(db, uploadId, ct);
+                upload = new UploadConfig(uploadId, extensions, options.Value.UploadMaxMegabytes);
+            }
+
             return new SiteConfig(s.Title, s.Subtitle, version, s.Access, s.AlphabetMenu, s.SplitItems, s.MaxItems, s.ShowCovers, Domain.Text.UiLanguages.Supported,
-                options.Value.Oidc.Enabled ? options.Value.Oidc.DisplayName : null, conversion.SourcesFor("epub"));
+                options.Value.Oidc.Enabled ? options.Value.Oidc.DisplayName : null, conversion.SourcesFor("epub"), upload);
         }).AllowAnonymous();
 
         var g = api.MapGroup("").RequireAuthorization(Policies.Reader);

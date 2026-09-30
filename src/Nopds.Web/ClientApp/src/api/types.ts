@@ -32,6 +32,26 @@ export interface BookSummary {
   series: SeriesInfo[]
   genres: GenreRef[]
   editions: number
+  /** Set for books users uploaded. */
+  upload?: UploadInfo
+}
+
+export interface UploadInfo { id: number; isPrivate: boolean; mine: boolean; uploadedBy?: string; uploadedAt: string }
+
+export interface UploadDto {
+  id: number
+  fileName: string
+  relPath: string
+  fileSize: number
+  isPrivate: boolean
+  uploadedAt: string
+  uploadedBy?: string
+  mine: boolean
+  /** Null until the scan picks the file up. */
+  bookId?: number
+  title?: string
+  /** The file disappeared from disk; the book is hidden. */
+  missing: boolean
 }
 
 export interface BookDetails {
@@ -45,7 +65,7 @@ export interface NamedCount { id: number; name: string; books: number }
 export interface AlphabetGroup { prefix: string; count: number }
 export interface GenreSectionInfo { key: string; name: string; books: number }
 export interface GenreInfo { id: number; code: string; name: string; section: string; books: number }
-export interface LibraryInfo { id: number; name: string; books: number; lastScanFinishedAt?: string }
+export interface LibraryInfo { id: number; name: string; books: number; lastScanFinishedAt?: string; isUploads?: boolean }
 export interface CatalogNode { id: number; name: string; path: string; type: 'directory' | 'zip' | 'inpx' | 'inp'; libraryId?: number }
 export interface CatalogListing { current?: CatalogNode; breadcrumbs: CatalogNode[]; children: CatalogNode[]; books: Page<BookSummary> }
 export interface Stats { books: number; authors: number; series: number; genres: number; libraries: number; lastScan?: string }
@@ -64,6 +84,8 @@ export interface SiteConfig {
   sso?: string
   /** Formats the web reader opens as server-converted EPUB. */
   readerConversions: string[]
+  /** Present when users may upload books. */
+  uploads?: { libraryId: number; extensions: string[]; maxMegabytes: number }
 }
 
 export interface User {
@@ -105,9 +127,11 @@ export interface LibraryDto {
   lastScanSummary?: string
   books: number
   rootExists: boolean
+  /** The upload library (its folder comes from the server configuration). */
+  isUploads: boolean
 }
 
-export type LibraryInput = Omit<LibraryDto, 'id' | 'lastScanStartedAt' | 'lastScanFinishedAt' | 'lastScanSummary' | 'books' | 'rootExists'>
+export type LibraryInput = Omit<LibraryDto, 'id' | 'lastScanStartedAt' | 'lastScanFinishedAt' | 'lastScanSummary' | 'books' | 'rootExists' | 'isUploads'>
 
 export interface ScanStatus {
   libraryId: number
