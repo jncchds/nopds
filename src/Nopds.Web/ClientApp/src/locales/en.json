@@ -166,8 +166,17 @@
     "setPassword": "Set password",
     "systemLanguage": "System language",
     "telegram": "Telegram",
-    "telegramHint": "Link your Telegram account to use the library bot.",
-    "telegramUser": "Telegram user name"
+    "telegramHint": "Link your Telegram account to search and download books through the library bot. Works without a Telegram user name.",
+    "telegramLink": "Link Telegram",
+    "telegramLinked": "Telegram is linked.",
+    "telegramLinkedAs": "Linked to Telegram {{name}}.",
+    "telegramNotLinked": "Telegram is not linked.",
+    "telegramOpen": "Open {{bot}}",
+    "telegramPending": "Open the bot and press Start — or scan the code with your phone. The link works once and expires in 15 minutes.",
+    "telegramRelink": "Link another account",
+    "telegramUnlink": "Unlink",
+    "telegramUnlinkConfirm": "Unlink Telegram from this account? The bot will stop recognising you.",
+    "telegramWaiting": "Waiting for confirmation from the bot…"
   },
   "admin": {
     "access": "Access",
@@ -180,7 +189,7 @@
     "allLibraries": "All libraries",
     "alphabetMenu": "Alphabet navigation",
     "botAuth": "Only linked users",
-    "botAuthHint": "Telegram users must link their user name in their profile.",
+    "botAuthHint": "Telegram users must link their account from the settings page.",
     "botMaxItems": "Results per message",
     "botToken": "Bot token",
     "browse": "Browse",

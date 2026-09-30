@@ -170,8 +170,17 @@
     "setPassword": "Ustaw hasło",
     "systemLanguage": "Język systemu",
     "telegram": "Telegram",
-    "telegramHint": "Powiąż konto Telegram, aby korzystać z bota biblioteki.",
-    "telegramUser": "Nazwa użytkownika Telegram"
+    "telegramHint": "Połącz Telegram, aby wyszukiwać i pobierać książki przez bota biblioteki. Nazwa użytkownika Telegram nie jest wymagana.",
+    "telegramLink": "Połącz Telegram",
+    "telegramLinked": "Telegram jest połączony.",
+    "telegramLinkedAs": "Połączono z Telegramem {{name}}.",
+    "telegramNotLinked": "Telegram nie jest połączony.",
+    "telegramOpen": "Otwórz {{bot}}",
+    "telegramPending": "Otwórz bota i naciśnij Start — albo zeskanuj kod telefonem. Link działa jednorazowo i wygasa po 15 minutach.",
+    "telegramRelink": "Połącz inne konto",
+    "telegramUnlink": "Odłącz",
+    "telegramUnlinkConfirm": "Odłączyć Telegram od tego konta? Bot przestanie cię rozpoznawać.",
+    "telegramWaiting": "Czekam na potwierdzenie od bota…"
   },
   "admin": {
     "access": "Dostęp",
@@ -184,7 +193,7 @@
     "allLibraries": "Wszystkie biblioteki",
     "alphabetMenu": "Nawigacja alfabetyczna",
     "botAuth": "Tylko powiązani użytkownicy",
-    "botAuthHint": "Użytkownicy Telegrama muszą podać swoją nazwę w profilu.",
+    "botAuthHint": "Użytkownicy Telegrama muszą połączyć konto na stronie ustawień.",
     "botMaxItems": "Wyników na wiadomość",
     "botToken": "Token bota",
     "browse": "Przeglądaj",

@@ -9,6 +9,8 @@ import { useAuth } from '../auth/AuthContext'
 import { LANGUAGES, detectLanguage, rememberLanguage } from '../i18n'
 import { PageTitle, Toggle } from '../components/ui'
 import { useDownloadFormats } from '../hooks/useDownloadFormats'
+import { useConfig } from '../api/hooks'
+import { TelegramLink } from '../components/TelegramLink'
 
 function Section({ title, children, description }: { title: string; description?: ReactNode; children: ReactNode }) {
   return (
@@ -46,9 +48,9 @@ export default function Settings() {
   const qc = useQueryClient()
   const origin = window.location.origin
   const [qr, setQr] = useState<string>()
-  const [telegram, setTelegram] = useState(user?.telegramUsername ?? '')
   const [msg, setMsg] = useState<Record<string, string>>({})
   const formats = useDownloadFormats()
+  const config = useConfig()
 
   const opdsUrl = feedToken ? `${origin}/opds/t/${feedToken}/` : ''
   useEffect(() => {
@@ -57,7 +59,7 @@ export default function Settings() {
 
   if (!user) return null
 
-  const update = async (patch: Partial<Pick<User, 'uiLanguage' | 'hideDuplicates' | 'telegramUsername' | 'preferredFormat'>> & { uiLanguage?: string }) => {
+  const update = async (patch: Partial<Pick<User, 'uiLanguage' | 'hideDuplicates' | 'preferredFormat'>> & { uiLanguage?: string }) => {
     const u = await api<User>('/me', { method: 'PUT', json: patch })
     setUser(u)
     qc.invalidateQueries({ queryKey: ['books'] })
@@ -154,23 +156,11 @@ export default function Settings() {
         <p className="mt-2 text-xs muted">{user.kosyncConfigured ? t('settings.kosyncOn') : t('settings.kosyncOff')} {msg.kosync}</p>
       </Section>
 
-      <Section title={t('settings.telegram')} description={t('settings.telegramHint')}>
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault()
-            await update({ telegramUsername: telegram })
-            setMsg({ telegram: t('settings.saved') })
-          }}
-          className="flex flex-wrap items-end gap-2"
-        >
-          <label className="block flex-1">
-            <span className="label">{t('settings.telegramUser')}</span>
-            <input className="input" value={telegram} onChange={(e) => setTelegram(e.target.value)} placeholder="@username" />
-          </label>
-          <button className="btn-primary">{t('common.save')}</button>
-        </form>
-        {msg.telegram && <p className="mt-2 text-xs muted">{msg.telegram}</p>}
-      </Section>
+      {(config.data?.telegramBot || user.telegramLinked) && (
+        <Section title={t('settings.telegram')} description={t('settings.telegramHint')}>
+          <TelegramLink bot={config.data?.telegramBot} />
+        </Section>
+      )}
 
       <Section title={t('settings.password')} description={user.hasPassword ? undefined : t('settings.noPasswordHint')}>
         <form onSubmit={changePassword} className="grid gap-3 sm:grid-cols-3">

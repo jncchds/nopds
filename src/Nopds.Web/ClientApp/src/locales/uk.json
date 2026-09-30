@@ -170,8 +170,17 @@
     "setPassword": "Встановити пароль",
     "systemLanguage": "Мова системи",
     "telegram": "Telegram",
-    "telegramHint": "Прив'яжіть свій Telegram, щоб користуватися ботом бібліотеки.",
-    "telegramUser": "Ім'я користувача Telegram"
+    "telegramHint": "Прив'яжіть Telegram, щоб шукати й завантажувати книги через бота бібліотеки. Ім'я користувача Telegram не потрібне.",
+    "telegramLink": "Прив'язати Telegram",
+    "telegramLinked": "Telegram прив'язано.",
+    "telegramLinkedAs": "Прив'язано до Telegram {{name}}.",
+    "telegramNotLinked": "Telegram не прив'язано.",
+    "telegramOpen": "Відкрити {{bot}}",
+    "telegramPending": "Відкрийте бота й натисніть «Почати» — або відскануйте код телефоном. Посилання одноразове й діє 15 хвилин.",
+    "telegramRelink": "Прив'язати інший акаунт",
+    "telegramUnlink": "Відв'язати",
+    "telegramUnlinkConfirm": "Відв'язати Telegram від цього облікового запису? Бот перестане вас впізнавати.",
+    "telegramWaiting": "Чекаємо підтвердження від бота…"
   },
   "admin": {
     "access": "Доступ",
@@ -184,7 +193,7 @@
     "allLibraries": "Усі бібліотеки",
     "alphabetMenu": "Навігація за абеткою",
     "botAuth": "Лише прив'язані користувачі",
-    "botAuthHint": "Користувачі Telegram мають вказати своє ім'я в профілі.",
+    "botAuthHint": "Користувачі Telegram мають прив'язати акаунт на сторінці налаштувань.",
     "botMaxItems": "Результатів у повідомленні",
     "botToken": "Токен бота",
     "browse": "Огляд",

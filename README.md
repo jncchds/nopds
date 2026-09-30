@@ -33,7 +33,7 @@ Built with **ASP.NET Core (.NET 10)**, **PostgreSQL** and a **React + TypeScript
 - **OPDS 1.2** (Atom) and **OPDS 2.0** (JSON) catalogs: by folders, titles, authors, series, genres, new books, bookshelf, search (OpenSearch), duplicate facets
 - Readers authenticate with HTTP Basic or a **personal feed link** (`/opds/t/<token>/`) for apps without login support
 - **KOReader progress sync** (kosync-compatible)
-- Optional **Telegram bot**: search, book cards, file delivery
+- Optional **Telegram bot**: search, book cards, file delivery; users link their Telegram account from **Settings** with a one-time deep link (QR code for linking from a phone), no Telegram user name needed
 
 **Web app**
 - Browse by alphabet (Cyrillic/Latin/digits), authors, series, genres, folders; full search

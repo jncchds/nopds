@@ -12,7 +12,7 @@ namespace Nopds.Telegram;
 /// Optional Telegram bot hosted inside the web app. It runs only when enabled with a token in the
 /// admin settings and restarts automatically when those settings change (long polling, no webhook).
 /// </summary>
-public sealed class TelegramBotService(SettingsStore settings, IServiceScopeFactory scopes, ILoggerFactory loggers) : BackgroundService
+public sealed class TelegramBotService(SettingsStore settings, IServiceScopeFactory scopes, TelegramLinks links, ILoggerFactory loggers) : BackgroundService
 {
     private readonly ILogger _log = loggers.CreateLogger<TelegramBotService>();
     private CancellationTokenSource? _restart;
@@ -37,7 +37,8 @@ public sealed class TelegramBotService(SettingsStore settings, IServiceScopeFact
                     var bot = new TelegramBotClient(tg.BotToken);
                     var me = await bot.GetMe(_restart.Token);
                     _log.LogInformation("Telegram bot @{Bot} started", me.Username);
-                    var handler = new BotUpdateHandler(scopes, settings, loggers.CreateLogger<BotUpdateHandler>());
+                    links.BotUsername = me.Username;
+                    var handler = new BotUpdateHandler(scopes, settings, links, loggers.CreateLogger<BotUpdateHandler>());
                     await bot.ReceiveAsync(handler, new ReceiverOptions
                     {
                         AllowedUpdates = [UpdateType.Message, UpdateType.CallbackQuery],
@@ -52,6 +53,10 @@ public sealed class TelegramBotService(SettingsStore settings, IServiceScopeFact
                 {
                     _log.LogWarning(ex, "Telegram bot stopped; retrying in 60 s");
                     await WaitAsync(_restart.Token, TimeSpan.FromSeconds(60));
+                }
+                finally
+                {
+                    links.BotUsername = null;
                 }
             }
         }

@@ -32,6 +32,7 @@ public class NopdsDbContext(DbContextOptions<NopdsDbContext> options) : Identity
             e.ToTable("users");
             e.HasIndex(u => u.FeedToken).IsUnique();
             e.HasIndex(u => u.TelegramUsername);
+            e.HasIndex(u => u.TelegramUserId).IsUnique();
             e.Property(u => u.FeedToken).HasMaxLength(64);
             e.Property(u => u.UiLanguage).HasMaxLength(8);
             e.Property(u => u.PreferredFormat).HasMaxLength(16);

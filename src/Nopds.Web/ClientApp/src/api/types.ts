@@ -88,6 +88,8 @@ export interface SiteConfig {
   conversions: Record<string, string[]>
   /** Present when users may upload books. */
   uploads?: { libraryId: number; extensions: string[]; maxMegabytes: number }
+  /** User name of the running Telegram bot; absent when the bot is off. */
+  telegramBot?: string
 }
 
 export interface User {
@@ -97,6 +99,8 @@ export interface User {
   uiLanguage?: string
   hideDuplicates: boolean
   allowedLibraryIds?: number[]
+  telegramLinked: boolean
+  /** Telegram @name of the linked account, when it has one. */
   telegramUsername?: string
   kosyncConfigured: boolean
   hasPassword: boolean
@@ -182,6 +186,7 @@ export interface AdminUser {
   locked: boolean
   approved: boolean
   createdAt: string
+  telegram: boolean
   telegramUsername?: string
   email?: string
   /** Provider name when the account is linked to single sign-on. */

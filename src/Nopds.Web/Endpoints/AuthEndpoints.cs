@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Nopds.Domain.Text;
 using Nopds.Infrastructure.Data;
 using Nopds.Infrastructure.Identity;
+using Nopds.Telegram;
 using Nopds.Web.Auth;
 using Nopds.Web.Infrastructure;
 
@@ -16,13 +17,15 @@ public static class AuthEndpoints
 
     public sealed record LoginRequest(string UserName, string Password);
 
-    public sealed record UserDto(Guid Id, string UserName, bool IsAdmin, string? UiLanguage, bool HideDuplicates, int[]? AllowedLibraryIds, string? TelegramUsername, bool KosyncConfigured, bool HasPassword,
-        string? PreferredFormat);
+    public sealed record UserDto(Guid Id, string UserName, bool IsAdmin, string? UiLanguage, bool HideDuplicates, int[]? AllowedLibraryIds, bool TelegramLinked, string? TelegramUsername, bool KosyncConfigured,
+        bool HasPassword, string? PreferredFormat);
 
     public sealed record AuthResponse(string AccessToken, DateTimeOffset ExpiresAt, UserDto User);
 
     /// <summary>Null fields stay unchanged; an empty PreferredFormat means "the book's own format".</summary>
-    public sealed record ProfileUpdate(string? UiLanguage, bool? HideDuplicates, string? TelegramUsername, string? PreferredFormat);
+    public sealed record ProfileUpdate(string? UiLanguage, bool? HideDuplicates, string? PreferredFormat);
+
+    public sealed record TelegramLink(string Url, string Token, DateTimeOffset ExpiresAt);
 
     /// <summary>CurrentPassword may be empty for single sign-on accounts that have no password yet.</summary>
     public sealed record PasswordChange(string? CurrentPassword, string NewPassword);
@@ -30,8 +33,8 @@ public static class AuthEndpoints
     public sealed record KosyncKey(string Password);
 
     public static UserDto ToDto(this AppUser u) =>
-        new(u.Id, u.UserName ?? "", u.IsAdmin, u.UiLanguage, u.HideDuplicates, u.AllowedLibraryIds, u.TelegramUsername, u.KosyncKeyHash is not null, u.PasswordHash is not null,
-            u.PreferredFormat);
+        new(u.Id, u.UserName ?? "", u.IsAdmin, u.UiLanguage, u.HideDuplicates, u.AllowedLibraryIds, u.TelegramLinked, u.TelegramUsername, u.KosyncKeyHash is not null,
+            u.PasswordHash is not null, u.PreferredFormat);
 
     public static void MapAuthEndpoints(this IEndpointRouteBuilder api)
     {
@@ -127,12 +130,6 @@ public static class AuthEndpoints
                 u.PreferredFormat = format.Length == 0 ? null : format;
             }
 
-            if (req.TelegramUsername is not null)
-            {
-                var tg = req.TelegramUsername.Trim().TrimStart('@');
-                u.TelegramUsername = tg.Length == 0 ? null : tg;
-            }
-
             await db.SaveChangesAsync(ct);
             return Results.Ok(u.ToDto());
         });
@@ -166,6 +163,25 @@ public static class AuthEndpoints
             u.FeedToken = AppUser.NewToken();
             await db.SaveChangesAsync(ct);
             return Results.Ok(new { token = u.FeedToken });
+        });
+
+        me.MapPost("/telegram", (CurrentUser cu, TelegramLinks links) =>
+        {
+            if (links.BotUsername is not { } bot)
+            {
+                return Results.Problem("The Telegram bot is not running.", statusCode: StatusCodes.Status409Conflict);
+            }
+
+            var token = links.Create(cu.Id!.Value);
+            return Results.Ok(new TelegramLink($"https://t.me/{bot}?start={token}", token, DateTimeOffset.UtcNow + TelegramLinks.Lifetime));
+        });
+
+        me.MapGet("/telegram/{token}", (string token, CurrentUser cu, TelegramLinks links) => Results.Ok(new { Linked = links.IsUsed(token, cu.Id!.Value) }));
+
+        me.MapDelete("/telegram", async (CurrentUser cu, NopdsDbContext db, CancellationToken ct) =>
+        {
+            await db.Users.Where(u => u.Id == cu.Id).ExecuteUpdateAsync(x => x.SetProperty(u => u.TelegramUserId, (long?)null).SetProperty(u => u.TelegramUsername, (string?)null), ct);
+            return Results.NoContent();
         });
 
         me.MapPut("/kosync", async (KosyncKey req, CurrentUser cu, NopdsDbContext db, CancellationToken ct) =>

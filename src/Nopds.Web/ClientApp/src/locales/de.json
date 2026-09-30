@@ -166,8 +166,17 @@
     "setPassword": "Passwort festlegen",
     "systemLanguage": "Systemsprache",
     "telegram": "Telegram",
-    "telegramHint": "Verknüpfe dein Telegram-Konto, um den Bibliotheks-Bot zu nutzen.",
-    "telegramUser": "Telegram-Benutzername"
+    "telegramHint": "Verknüpfe Telegram, um Bücher über den Bibliotheks-Bot zu suchen und herunterzuladen. Ein Telegram-Benutzername ist nicht nötig.",
+    "telegramLink": "Telegram verknüpfen",
+    "telegramLinked": "Telegram ist verknüpft.",
+    "telegramLinkedAs": "Mit Telegram {{name}} verknüpft.",
+    "telegramNotLinked": "Telegram ist nicht verknüpft.",
+    "telegramOpen": "{{bot}} öffnen",
+    "telegramPending": "Öffne den Bot und tippe auf Start – oder scanne den Code mit dem Handy. Der Link gilt einmal und läuft nach 15 Minuten ab.",
+    "telegramRelink": "Anderes Konto verknüpfen",
+    "telegramUnlink": "Trennen",
+    "telegramUnlinkConfirm": "Telegram von diesem Konto trennen? Der Bot erkennt dich dann nicht mehr.",
+    "telegramWaiting": "Warte auf Bestätigung vom Bot…"
   },
   "admin": {
     "access": "Zugriff",
@@ -180,7 +189,7 @@
     "allLibraries": "Alle Bibliotheken",
     "alphabetMenu": "Alphabet-Navigation",
     "botAuth": "Nur verknüpfte Benutzer",
-    "botAuthHint": "Telegram-Benutzer müssen ihren Namen im Profil hinterlegen.",
+    "botAuthHint": "Telegram-Nutzer müssen ihr Konto in den Einstellungen verknüpfen.",
     "botMaxItems": "Ergebnisse pro Nachricht",
     "botToken": "Bot-Token",
     "browse": "Durchsuchen",

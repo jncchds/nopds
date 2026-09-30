@@ -28,7 +28,7 @@ public static class AdminEndpoints
     public sealed record UserInput(string? UserName, string? Password, bool? IsAdmin, int[]? AllowedLibraryIds, bool? AllLibraries, bool? Locked, bool? Approved);
 
     /// <param name="Sso">Provider name when the account is linked to single sign-on.</param>
-    public sealed record AdminUserDto(Guid Id, string UserName, bool IsAdmin, int[]? AllowedLibraryIds, bool Locked, bool Approved, DateTimeOffset CreatedAt, string? TelegramUsername, string? Email, string? Sso);
+    public sealed record AdminUserDto(Guid Id, string UserName, bool IsAdmin, int[]? AllowedLibraryIds, bool Locked, bool Approved, DateTimeOffset CreatedAt, bool Telegram, string? TelegramUsername, string? Email, string? Sso);
 
     public sealed record DirEntry(string Name, string Path);
 
@@ -356,7 +356,7 @@ public static class AdminEndpoints
 
     private static AdminUserDto ToDto(AppUser u, string? sso = null) => new(
         u.Id, u.UserName ?? "", u.IsAdmin, u.AllowedLibraryIds, u.LockoutEnd is { } e && e > DateTimeOffset.UtcNow, u.IsApproved, u.CreatedAt,
-        u.TelegramUsername, u.Email, sso);
+        u.TelegramLinked, u.TelegramUsername, u.Email, sso);
 
     private static IResult Problem(IdentityResult r) =>
         Results.ValidationProblem(r.Errors.GroupBy(e => e.Code).ToDictionary(g => g.Key, g => g.Select(e => e.Description).ToArray()));

@@ -26,7 +26,7 @@ namespace Nopds.Telegram;
 /// authors or series, paged inline keyboards, book cards and file delivery (original or converted).
 /// Callback data stays under Telegram's 64-byte limit by keeping search terms in a short-lived cache.
 /// </summary>
-internal sealed class BotUpdateHandler(IServiceScopeFactory scopes, SettingsStore settings, ILogger<BotUpdateHandler> log) : IUpdateHandler
+internal sealed class BotUpdateHandler(IServiceScopeFactory scopes, SettingsStore settings, TelegramLinks links, ILogger<BotUpdateHandler> log) : IUpdateHandler
 {
     private const long MaxTelegramFile = 50L * 1024 * 1024;
     private static readonly MemoryCache Queries = new(new MemoryCacheOptions { SizeLimit = 10_000 });
@@ -62,11 +62,20 @@ internal sealed class BotUpdateHandler(IServiceScopeFactory scopes, SettingsStor
     private async Task<Caller?> IdentifyAsync(IServiceProvider sp, User from, CancellationToken ct)
     {
         var db = sp.GetRequiredService<NopdsDbContext>();
-        AppUser? user = null;
-        if (!string.IsNullOrEmpty(from.Username))
+        var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.TelegramUserId == from.Id, ct);
+        if (user is null && !string.IsNullOrEmpty(from.Username))
         {
+            // Links made by typing a username before deep links existed: adopt the id on first contact.
             var name = from.Username.ToLowerInvariant();
-            user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.TelegramUsername != null && u.TelegramUsername.ToLower() == name, ct);
+            user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.TelegramUserId == null && u.TelegramUsername != null && u.TelegramUsername.ToLower() == name, ct);
+            if (user is not null)
+            {
+                await db.Users.Where(u => u.Id == user.Id).ExecuteUpdateAsync(x => x.SetProperty(u => u.TelegramUserId, from.Id), ct);
+            }
+        }
+        else if (user is not null && user.TelegramUsername != from.Username)
+        {
+            await db.Users.Where(u => u.Id == user.Id).ExecuteUpdateAsync(x => x.SetProperty(u => u.TelegramUsername, from.Username), ct);
         }
 
         var s = settings.Current;
@@ -90,6 +99,13 @@ internal sealed class BotUpdateHandler(IServiceScopeFactory scopes, SettingsStor
     private async Task OnMessageAsync(ITelegramBotClient bot, long chat, User from, string text, CancellationToken ct)
     {
         await using var scope = scopes.CreateAsyncScope();
+        var (command, rest) = SplitCommand(text);
+        if (command == "/start" && rest.Length > 0)
+        {
+            await LinkAsync(bot, chat, scope.ServiceProvider, from, rest, ct);
+            return;
+        }
+
         var caller = await IdentifyAsync(scope.ServiceProvider, from, ct);
         var lang = caller?.Lang ?? UiLanguages.Match(from.LanguageCode) ?? UiLanguages.Default;
         if (caller is null)
@@ -98,7 +114,6 @@ internal sealed class BotUpdateHandler(IServiceScopeFactory scopes, SettingsStor
             return;
         }
 
-        var (command, rest) = SplitCommand(text);
         switch (command)
         {
             case "/start":
@@ -131,6 +146,27 @@ internal sealed class BotUpdateHandler(IServiceScopeFactory scopes, SettingsStor
             ],
         ]);
         await bot.SendMessage(chat, L.Format(lang, "tg.choose", text), replyMarkup: keyboard, cancellationToken: ct);
+    }
+
+    private async Task LinkAsync(ITelegramBotClient bot, long chat, IServiceProvider sp, User from, string token, CancellationToken ct)
+    {
+        var db = sp.GetRequiredService<NopdsDbContext>();
+        var userId = links.Consume(token);
+        var user = userId is null ? null : await db.Users.FirstOrDefaultAsync(u => u.Id == userId, ct);
+        var lang = UiLanguages.Match(user?.UiLanguage) ?? UiLanguages.Match(from.LanguageCode) ?? UiLanguages.Default;
+        if (user is null)
+        {
+            await bot.SendMessage(chat, L.Get(lang, "tg.linkExpired"), cancellationToken: ct);
+            return;
+        }
+
+        // One Telegram account belongs to one web user: move it if it was linked elsewhere.
+        await db.Users.Where(u => u.TelegramUserId == from.Id && u.Id != user.Id)
+            .ExecuteUpdateAsync(x => x.SetProperty(u => u.TelegramUserId, (long?)null).SetProperty(u => u.TelegramUsername, (string?)null), ct);
+        user.TelegramUserId = from.Id;
+        user.TelegramUsername = from.Username;
+        await db.SaveChangesAsync(ct);
+        await bot.SendMessage(chat, L.Format(lang, "tg.linked", user.UserName ?? string.Empty) + "\n\n" + L.Get(lang, "tg.welcome"), cancellationToken: ct);
     }
 
     private async Task OnCallbackAsync(ITelegramBotClient bot, long chat, User from, string data, CancellationToken ct)

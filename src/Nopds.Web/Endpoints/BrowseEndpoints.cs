@@ -13,7 +13,7 @@ public static class BrowseEndpoints
     public sealed record BookDetails(BookSummary Book, IReadOnlyList<string> ConvertTargets, bool OnShelf, string? KoreaderHash);
 
     public sealed record SiteConfig(string Title, string Subtitle, string Version, AccessMode Access, bool AlphabetMenu, int SplitItems, int PageSize, bool ShowCovers, string[] Languages, string? Sso,
-        IReadOnlyList<string> ReaderConversions, IReadOnlyDictionary<string, IReadOnlyList<string>> Conversions, UploadConfig? Uploads);
+        IReadOnlyList<string> ReaderConversions, IReadOnlyDictionary<string, IReadOnlyList<string>> Conversions, UploadConfig? Uploads, string? TelegramBot);
 
     /// <summary>Present when users may upload books.</summary>
     public sealed record UploadConfig(int LibraryId, string[] Extensions, int MaxMegabytes);
@@ -21,7 +21,7 @@ public static class BrowseEndpoints
     public static void MapBrowseEndpoints(this IEndpointRouteBuilder api)
     {
         api.MapGet("/config", async (SettingsStore settings, ConversionService conversion, Microsoft.Extensions.Options.IOptions<NopdsOptions> options,
-            Nopds.Infrastructure.Uploads.UploadLibrary uploads, Nopds.Infrastructure.Data.NopdsDbContext db, CancellationToken ct) =>
+            Nopds.Infrastructure.Uploads.UploadLibrary uploads, Nopds.Infrastructure.Data.NopdsDbContext db, Nopds.Telegram.TelegramLinks telegram, CancellationToken ct) =>
         {
             var s = settings.Current;
             var version = typeof(BrowseEndpoints).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
@@ -33,7 +33,7 @@ public static class BrowseEndpoints
             }
 
             return new SiteConfig(s.Title, s.Subtitle, version, s.Access, s.AlphabetMenu, s.SplitItems, s.MaxItems, s.ShowCovers, Domain.Text.UiLanguages.Supported,
-                options.Value.Oidc.Enabled ? options.Value.Oidc.DisplayName : null, conversion.SourcesFor("epub"), conversion.TargetMap(), upload);
+                options.Value.Oidc.Enabled ? options.Value.Oidc.DisplayName : null, conversion.SourcesFor("epub"), conversion.TargetMap(), upload, telegram.BotUsername);
         }).AllowAnonymous();
 
         var g = api.MapGroup("").RequireAuthorization(Policies.Reader);

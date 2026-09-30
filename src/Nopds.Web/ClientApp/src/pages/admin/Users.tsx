@@ -40,7 +40,7 @@ export default function Users() {
                 {formatDate(u.createdAt, i18n.language)} · {u.allowedLibraryIds ? t('admin.someLibraries', { count: u.allowedLibraryIds.length }) : t('admin.allLibraries')}
                 {u.sso && ` · ${u.sso}`}
                 {u.email && ` · ${u.email}`}
-                {u.telegramUsername && ` · @${u.telegramUsername}`}
+                {u.telegram && ` · Telegram${u.telegramUsername ? ` @${u.telegramUsername}` : ''}`}
               </div>
             </div>
             {!u.approved && (

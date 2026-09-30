@@ -1,5 +1,11 @@
 # Release Notes
 
+## v0.1.4 — 2026-09-30
+
+- feat: link Telegram from **Settings** — a one-time deep link (`t.me/<bot>?start=…`, with a QR code for phones, valid 15 minutes) binds the Telegram account by its numeric id, so accounts without a Telegram user name work; the page confirms as soon as the bot has linked it, and **Unlink** removes the link
+- feat: the typed Telegram user name field is gone; existing user-name links keep working and switch to the id on the first message to the bot
+- feat: the admin user list shows linked Telegram accounts, and `/api/config` exposes the running bot's user name (the Telegram section appears only while the bot runs or an account is linked)
+
 ## v0.1.3 — 2026-09-30
 
 - feat: optional upload library — set `Nopds__UploadPath` and a library for that folder is created (scanned, tracked and browsable like any other); every signed-in user can upload books from the new **Upload** page, including users restricted to other libraries
